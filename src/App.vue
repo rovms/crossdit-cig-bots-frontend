@@ -37,24 +37,20 @@
       </v-btn>
     </v-app-bar>
 
-    <v-main>
-      <HelloWorld/>
-    </v-main>
+    <v-data-iterator class="ma-10" :items="items">
+      <div v-for="item in items" :key="item.id">{{item}}</div>
+    </v-data-iterator>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld';
 
 export default {
   name: 'App',
 
-  components: {
-    HelloWorld,
-  },
 
   data: () => ({
-    //
+    items: ['123', '124']
   }),
 };
 </script>
