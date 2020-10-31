@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
 import RobotList from "@/components/RobotList.vue"
+import RobotDetails from "@/components/RobotDetails.vue"
+import HelloWorld from "@/components/HelloWorld.vue"
 
 Vue.use(VueRouter)
 
@@ -9,12 +10,17 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home
+    component: HelloWorld,
   },
   {
     path: '/robots',
     name: "Robots",
     component: RobotList
+  },
+  {
+    path: '/robots/:robotId',
+    name: "RobotDetails",
+    component: RobotDetails
   }
 ]
 
