@@ -1,27 +1,14 @@
 <template>
   <v-container>
     <v-card v-for="robot in robots" :key="robot.id" class="ma-1">
-      <v-card-title class="pb-0">
-        {{ robot.name }}
-      </v-card-title>
+      <v-card-title class="pb-0"> ID: {{ robot.id }} </v-card-title>
       <v-list class="transparent">
         <v-list-item>
-          <v-list-item-title>Energy used</v-list-item-title>
+          <v-list-item-title>Battery</v-list-item-title>
           <v-list-item-icon>
-            <v-icon>mdi-chart-donut</v-icon>
+            <v-icon :color="batteryColor(robot.id)">{{ batteryIcon(robot.id) }}</v-icon>
           </v-list-item-icon>
-          <v-list-item-subtitle class="text-right">
-            {{ robot.energyUsed || 0 }}
-          </v-list-item-subtitle>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-title>Battery level</v-list-item-title>
-          <v-list-item-icon>
-            <v-icon color="green">mdi-battery</v-icon>
-          </v-list-item-icon>
-          <v-list-item-subtitle class="text-right">
-            {{ robot.batteryLevel || 0 }}
-          </v-list-item-subtitle>
+          <v-list-item-subtitle class="text-right"> {{ robot.batteryLevel || 0 }} % </v-list-item-subtitle>
         </v-list-item>
       </v-list>
       <v-divider></v-divider>
@@ -50,6 +37,26 @@ export default {
       .catch((error) => {
         alert(error);
       });
+  },
+
+  methods: {
+    batteryColor(robotId) {
+      const robot = this.robots.find((r) => r.id === robotId);
+      if (!robot) return "grey";
+      const batteryLevel = robot.batteryLevel;
+      if (batteryLevel > 70) return "green";
+      if (batteryLevel > 30) return "yellow";
+      else return "red";
+    },
+
+    batteryIcon(robotId) {
+      const robot = this.robots.find((r) => r.id === robotId);
+      if (!robot) return "mdi-battery";
+      const batteryLevel = robot.batteryLevel;
+      if (batteryLevel > 70) return "mdi-battery";
+      if (batteryLevel > 30) return "mdi-battery-50";
+      else return "mdi-battery-20";
+    },
   },
 };
 </script>
