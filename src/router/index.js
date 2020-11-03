@@ -1,33 +1,33 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import RobotList from "@/components/RobotList.vue"
-import RobotDetails from "@/components/RobotDetails.vue"
-import HelloWorld from "@/components/HelloWorld.vue"
+import Vue from "vue";
+import VueRouter from "vue-router";
+import RobotList from "@/components/RobotList.vue";
+import RobotDetails from "@/components/RobotDetails.vue";
+import Home from "@/components/Home.vue";
 
-Vue.use(VueRouter)
+Vue.use(VueRouter);
 
 const routes = [
   {
-    path: '/',
-    name: 'Home',
-    component: HelloWorld,
+    path: "/",
+    name: "Home",
+    component: Home,
   },
   {
-    path: '/robots',
+    path: "/robots",
     name: "Robots",
-    component: RobotList
+    component: RobotList,
   },
   {
-    path: '/robots/:robotId',
+    path: "/robots/:robotId",
     name: "RobotDetails",
-    component: RobotDetails
-  }
-]
+    component: RobotDetails,
+  },
+];
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: "history",
   base: process.env.BASE_URL,
-  routes
-})
+  routes,
+});
 
-export default router
+export default router;

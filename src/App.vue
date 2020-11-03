@@ -6,6 +6,7 @@
     </v-app-bar>
     <v-main>
       <router-view />
+      <router-link :to="{ name: 'Robots' }" />
     </v-main>
   </v-app>
 </template>

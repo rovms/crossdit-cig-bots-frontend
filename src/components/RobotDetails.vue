@@ -18,9 +18,7 @@
             </v-list-item-content>
           </template>
           <v-list-item v-for="(cc, i) in robot.cigsCollected" :key="i">
-            <v-list-item-title>{{
-              cc.date | moment("DD.MM.YY h:mm:ss")
-            }}</v-list-item-title>
+            <v-list-item-title>{{ cc.date | moment("DD.MM.YY h:mm:ss") }}</v-list-item-title>
             <v-list-item-subtitle class="text-right">
               {{ cc.position.lat }} / {{ cc.position.lng }}
             </v-list-item-subtitle>
@@ -33,21 +31,31 @@
             {{ robot.batteryLevel }}
           </v-list-item-subtitle>
         </v-list-item>
-      </v-list>
-    </v-card>
 
-    <GmapMap
-      :center="{ lat: 55.659635, lng: 12.590958 }"
-      :zoom="14"
-      map-type-id="terrain"
-      style="width: 400px; height: 500px"
-    >
-      <GmapMarker
-        v-for="(cc, i) in robot.cigsCollected"
-        :key="i"
-        :position="cc.position"
-      />
-    </GmapMap>
+        <v-list-group>
+          <template v-slot:activator>
+            <v-list-item-content>
+              <v-list-item-title>Show on map</v-list-item-title>
+            </v-list-item-content>
+          </template>
+          <v-list-item>
+            <GmapMap
+              :center="{ lat: 55.659635, lng: 12.590958 }"
+              :zoom="14"
+              map-type-id="terrain"
+              style="width: 400px; height: 500px"
+            >
+              <GmapMarker v-for="(cc, i) in robot.cigsCollected" :key="i" :position="cc.position" />
+            </GmapMap>
+          </v-list-item>
+        </v-list-group>
+      </v-list>
+      <v-divider></v-divider>
+      <v-card-actions>
+        <v-btn small color="primary">Send to</v-btn>
+        <v-btn small color="warning">Pick up</v-btn>
+      </v-card-actions>
+    </v-card>
   </v-container>
 </template>
 
@@ -65,6 +73,12 @@ export default {
       .get("http://localhost:5000/api/robot/" + this.$route.params.robotId)
       .then((response) => {
         this.robot = response.data;
+        this.robot.cigsCollected.map((cc) => {
+          const pos = cc.position;
+          pos.lat = pos.lat.toFixed(5);
+          pos.lng = pos.lng.toFixed(5);
+          return cc;
+        });
       })
       .catch((error) => {
         alert(error);
