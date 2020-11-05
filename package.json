@@ -20,6 +20,7 @@
     "vue-router": "^3.2.0",
     "vue2-google-maps": "^0.10.7",
     "vue2-leaflet": "^2.6.0",
+    "vue2-leaflet-movingmarker": "^1.1.0",
     "vuetify": "^2.2.11"
   },
   "devDependencies": {
