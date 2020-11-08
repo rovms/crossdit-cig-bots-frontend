@@ -19,13 +19,13 @@
     <div style="height: 350px;">
       <LMap style="height: 100%; width: 100%" :zoom="zoom" :center="[55.66071, 12.6024]">
         <LTileLayer :url="url"></LTileLayer>
-        <!-- <LMovingMarker
-          v-for="(robot, id) in robots"
-          :key="id"
-          :lat-lng="robot.posL"
-          :icon="icon"
+        <LMovingMarker
+          v-for="l in locations"
+          :key="l.id"
+          :lat-lng="l.latlng"
           :duration="duration"
-        ></LMovingMarker> -->
+          :icon="icon"
+        ></LMovingMarker>
       </LMap>
     </div>
     <div v-for="(robot, id) in locations" :key="id">{{ robot.latlng }}</div>
@@ -36,7 +36,7 @@
 // import axios from "axios";
 import L from "leaflet";
 import { LMap, LTileLayer } from "vue2-leaflet";
-// import LMovingMarker from "vue2-leaflet-movingmarker";
+import LMovingMarker from "vue2-leaflet-movingmarker";
 
 const icon = L.icon({
   iconUrl: "https://s3-eu-west-1.amazonaws.com/ct-documents/emails/A-static.png",
@@ -55,13 +55,13 @@ for (let i = 0; i < 10; i++) {
 }
 
 function rand(n) {
-  const max = n + 0.01;
-  const min = n - 0.01;
+  const max = n + 0.001;
+  const min = n - 0.001;
   return Math.random() * (max - min) + min;
 }
 
 export default {
-  components: { LMap, LTileLayer },
+  components: { LMap, LTileLayer, LMovingMarker },
 
   data() {
     return {
@@ -131,8 +131,8 @@ export default {
           clearInterval(this.interval);
           const setRandomLatLng = () => {
             console.log("hello");
-            this.robots.forEach((robot) => {
-              if (robot.posL && robot.posL) robot.posL = L.latLng(rand(robot.posL.lat), rand(robot.posL.lng));
+            this.locations.forEach((location) => {
+              location.latlng = L.latLng(rand(48.8929425), rand(2.3821873));
             });
           };
           this.interval = setInterval(() => {
