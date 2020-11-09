@@ -17,25 +17,40 @@
       </v-card-actions>
     </v-card>
     <div style="height: 350px;">
-      <LMap style="height: 100%; width: 100%" :zoom="zoom" :center="[55.66071, 12.6024]">
+      <LMap
+        style="height: 100%; width: 100%"
+        ref="robotmap"
+        :zoom="zoom"
+        :center="[55.66071, 12.6024]"
+        @ready="mapReady"
+      >
         <LTileLayer :url="url"></LTileLayer>
-        <LMovingMarker
-          v-for="l in locations"
-          :key="l.id"
-          :lat-lng="l.latlng"
-          :duration="duration"
-          :icon="icon"
-        ></LMovingMarker>
+        <div v-if="robots && robots[0] && robots[0].latlng">
+          <div v-for="(r, i) in robots" :key="i">
+            <LMovingMarker
+              :ref="'robot' + i"
+              :lat-lng="r.latlng"
+              :duration="duration"
+              :icon="icon"
+              @click="hello(r)"
+            ></LMovingMarker>
+            <LCircle :lat-lng="r.latlng" :radius="r.radius || 300" color="red">
+              <LPopup>
+                Area of: <strong> {{ r.name }}</strong></LPopup
+              >
+            </LCircle>
+          </div>
+        </div>
       </LMap>
     </div>
-    <div v-for="(robot, id) in locations" :key="id">{{ robot.latlng }}</div>
+    <div v-for="(robot, id) in robots" :key="id">{{ robot.latlng }}</div>
   </v-container>
 </template>
 
 <script>
-// import axios from "axios";
+import axios from "axios";
 import L from "leaflet";
-import { LMap, LTileLayer } from "vue2-leaflet";
+import { LMap, LTileLayer, LCircle, LPopup } from "vue2-leaflet";
 import LMovingMarker from "vue2-leaflet-movingmarker";
 
 const icon = L.icon({
@@ -49,8 +64,9 @@ const locations = [];
 for (let i = 0; i < 10; i++) {
   locations.push({
     id: i,
-    latlng: L.latLng(rand(48.8929425), rand(2.3821873)),
+    latlng: L.latLng(rand(55.309735), rand(14.901958)),
     text: "Moving Marker #" + i,
+    radius: Math.random() * 100 + 4500,
   });
 }
 
@@ -61,20 +77,21 @@ function rand(n) {
 }
 
 export default {
-  components: { LMap, LTileLayer, LMovingMarker },
+  components: { LMap, LTileLayer, LMovingMarker, LCircle, LPopup },
 
   data() {
     return {
       robots: [],
 
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      zoom: 14,
+      zoom: 11,
       bounds: null,
 
       icon,
 
       duration: 5000,
       interval: null,
+      map: null,
 
       locations,
     };
@@ -84,26 +101,33 @@ export default {
   },
 
   methods: {
-    fetchRobots() {
-      // axios
-      //   .get("http://localhost:5000/api/robot")
-      //   .then((response) => {
-      //     this.robots = response.data;
-      //   })
-      //   .then(() => {
-      //     this.initializeLocations();
-      //   })
-      //   .catch((error) => {
-      //     alert(error);
-      //   });
+    hello(robot) {
+      console.log(robot);
+      L.popup()
+        .setLatLng(L.latLng(robot.latlng.lat + 0.01, robot.latlng.lng))
+        .setContent(robot.name)
+        .openOn(this.map);
+
+      console.log(this.$refs.robot1.mapObject);
     },
 
-    // initializeLocations() {
-    //   console.log("fine");
-    //   this.robots.forEach((r) => {
-    //     r.posL = L.latLng(r.position[0], r.position[1]);
-    //   });
-    // },
+    mapReady() {
+      this.map = this.$refs.robotmap.mapObject;
+    },
+
+    fetchRobots() {
+      axios
+        .get("http://localhost:5000/api/robot")
+        .then((response) => {
+          this.robots = response.data;
+          this.robots.forEach((r) => {
+            r.latlng = L.latLng(r.position[0], r.position[1]);
+          });
+        })
+        .catch((error) => {
+          alert(error);
+        });
+    },
 
     batteryColor(robotId) {
       const robot = this.robots.find((r) => r.id === robotId);
@@ -129,16 +153,17 @@ export default {
       handler(value, oldValue) {
         if (value !== oldValue) {
           clearInterval(this.interval);
-          const setRandomLatLng = () => {
-            console.log("hello");
-            this.locations.forEach((location) => {
-              location.latlng = L.latLng(rand(48.8929425), rand(2.3821873));
-            });
-          };
-          this.interval = setInterval(() => {
+          if (this.robots && this.robots[0]) {
+            const setRandomLatLng = () => {
+              this.robots.forEach((r) => {
+                r.latlng = L.latLng(rand(r.position[0]), rand(r.position[1]));
+              });
+            };
+            this.interval = setInterval(() => {
+              setRandomLatLng();
+            }, value);
             setRandomLatLng();
-          }, value);
-          setRandomLatLng();
+          }
         }
       },
       immediate: true,
@@ -146,6 +171,5 @@ export default {
   },
 };
 </script>
-()
 
 <style></style>

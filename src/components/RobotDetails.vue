@@ -72,7 +72,6 @@
 
       <v-divider></v-divider>
       <v-card-actions>
-        <v-btn small color="primary">Send to</v-btn>
         <v-btn small color="warning">Pick up</v-btn>
       </v-card-actions>
     </v-card>
@@ -115,14 +114,10 @@ export default {
   },
 
   methods: {
-    zoomUpdated(zoom) {
-      this.zoom = zoom;
-    },
-    centerUpdated(center) {
-      this.center = center;
-    },
-    boundsUpdated(bounds) {
-      this.bounds = bounds;
+    pickup() {
+      axios.post("http://localhost:5000/api/robot/pickup", {
+        robotId: this.$route.params.robotId,
+      });
     },
 
     move(cigarettePosition) {
