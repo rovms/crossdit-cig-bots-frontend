@@ -12,11 +12,23 @@
 </template>
 
 <script>
+import router from "./router";
+import axios from "axios";
 export default {
   name: "App",
 
   data: () => ({
     items: ["123", "124"],
   }),
+
+  created() {
+    axios.interceptors.response.use(undefined, function(err) {
+      if (err.response.status === 401) {
+        router.push({ name: "Home" });
+        return;
+      }
+      return Promise.reject(err);
+    });
+  },
 };
 </script>

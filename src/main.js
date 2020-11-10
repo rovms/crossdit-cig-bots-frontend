@@ -29,6 +29,8 @@ Vue.use(VueAxios, axios);
 
 Vue.use(require("vue-moment"));
 
+// Vue.prototype.$http = VueAxios;
+
 new Vue({
   vuetify,
   router,

@@ -72,7 +72,7 @@
 
       <v-divider></v-divider>
       <v-card-actions>
-        <v-btn small color="warning">Pick up</v-btn>
+        <v-btn @click="pickup" small color="warning">Pick up</v-btn>
       </v-card-actions>
     </v-card>
   </v-container>
@@ -81,6 +81,7 @@
 <script>
 import axios from "axios";
 import { LMap, LTileLayer, LMarker, LCircleMarker } from "vue2-leaflet";
+import authHeader from "@/auth/authHeader";
 
 export default {
   components: {
@@ -115,9 +116,14 @@ export default {
 
   methods: {
     pickup() {
-      axios.post("http://localhost:5000/api/robot/pickup", {
-        robotId: this.$route.params.robotId,
-      });
+      console.log("pickup");
+      axios.post(
+        "http://localhost:5000/api/robot/pickup",
+        {
+          robotId: this.$route.params.robotId,
+        },
+        { headers: authHeader() }
+      );
     },
 
     move(cigarettePosition) {
@@ -160,7 +166,7 @@ export default {
 
   created() {
     axios
-      .get("http://localhost:5000/api/robot/" + this.$route.params.robotId)
+      .get("http://localhost:5000/api/robot/" + this.$route.params.robotId, { headers: authHeader() })
       .then((response) => {
         this.robot = response.data;
         this.center = this.robot.position;

@@ -12,6 +12,7 @@
     "core-js": "^3.6.5",
     "euclidean-distance": "^1.0.0",
     "gmap-vue": "^1.4.1",
+    "jsonwebtoken": "^8.5.1",
     "leaflet": "^1.7.1",
     "scriptjs": "^2.5.9",
     "vue": "^2.6.11",
@@ -21,6 +22,7 @@
     "vue-router": "^3.2.0",
     "vue2-google-maps": "^0.10.7",
     "vue2-leaflet": "^2.6.0",
+    "vue2-leaflet-movingmarker": "^1.1.0",
     "vuetify": "^2.2.11"
   },
   "devDependencies": {

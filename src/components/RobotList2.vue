@@ -43,12 +43,12 @@
         </div>
       </LMap>
     </div>
-    <div v-for="(robot, id) in robots" :key="id">{{ robot.latlng }}</div>
   </v-container>
 </template>
 
 <script>
 import axios from "axios";
+import authHeader from "@/auth/authHeader";
 import L from "leaflet";
 import { LMap, LTileLayer, LCircle, LPopup } from "vue2-leaflet";
 import LMovingMarker from "vue2-leaflet-movingmarker";
@@ -60,19 +60,9 @@ const icon = L.icon({
   popupAnchor: [4, -25],
 });
 
-const locations = [];
-for (let i = 0; i < 10; i++) {
-  locations.push({
-    id: i,
-    latlng: L.latLng(rand(55.309735), rand(14.901958)),
-    text: "Moving Marker #" + i,
-    radius: Math.random() * 100 + 4500,
-  });
-}
-
 function rand(n) {
-  const max = n + 0.001;
-  const min = n - 0.001;
+  const max = n + 0.01;
+  const min = n - 0.01;
   return Math.random() * (max - min) + min;
 }
 
@@ -89,26 +79,24 @@ export default {
 
       icon,
 
-      duration: 5000,
+      duration: 2000,
       interval: null,
       map: null,
-
-      locations,
     };
   },
-  mounted() {
+  created() {
     this.fetchRobots();
   },
 
   methods: {
     hello(robot) {
       console.log(robot);
-      L.popup()
-        .setLatLng(L.latLng(robot.latlng.lat + 0.01, robot.latlng.lng))
-        .setContent(robot.name)
-        .openOn(this.map);
+      // L.popup()
+      //   .setLatLng(L.latLng(robot.latlng.lat + 0.01, robot.latlng.lng))
+      //   .setContent(robot.name)
+      //   .openOn(this.map);
 
-      console.log(this.$refs.robot1.mapObject);
+      // console.log(this.$refs.robot1.mapObject);
     },
 
     mapReady() {
@@ -117,7 +105,7 @@ export default {
 
     fetchRobots() {
       axios
-        .get("http://localhost:5000/api/robot")
+        .get("http://localhost:5000/api/robot", { headers: authHeader() })
         .then((response) => {
           this.robots = response.data;
           this.robots.forEach((r) => {
@@ -172,4 +160,6 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+@import "~leaflet/dist/leaflet.css";
+</style>
