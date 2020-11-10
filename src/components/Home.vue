@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-btn :to="{ name: 'Robots' }">Robots</v-btn>
+    <v-btn :to="{ name: 'Login' }">Login</v-btn>
   </v-container>
 </template>
 

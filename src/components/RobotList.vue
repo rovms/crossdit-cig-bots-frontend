@@ -1,109 +1,98 @@
 <template>
   <v-container>
-    <v-card v-for="robot in robots" :key="robot.id" class="ma-1">
-      <v-card-title class="pb-0"> ID: {{ robot.id }} </v-card-title>
-      <v-list class="transparent">
-        <v-list-item>
-          <v-list-item-title>Battery</v-list-item-title>
-          <v-list-item-icon>
-            <v-icon :color="batteryColor(robot.id)">{{ batteryIcon(robot.id) }}</v-icon>
-          </v-list-item-icon>
-          <v-list-item-subtitle class="text-right"> {{ robot.batteryLevel || 0 }} % </v-list-item-subtitle>
-        </v-list-item>
-      </v-list>
-      <v-divider></v-divider>
-      <v-card-actions>
-        <v-btn color="primary" :to="{ name: 'RobotDetails', params: { robotId: robot.id } }">Details</v-btn>
-      </v-card-actions>
+    <v-btn class="my-1" @click="mapView = !mapView">
+      <v-icon>mdi-table-large</v-icon>
+    </v-btn>
+    <v-btn class="my-1" @click="mapView = !mapView">
+      <v-icon>mdi-google-maps</v-icon>
+    </v-btn>
+    <v-card v-if="!mapView">
+      <v-card-title>
+        <v-text-field v-model="search" append-icon="mdi-magnify" label="Search" single-line hide-details></v-text-field>
+        <v-spacer></v-spacer>
+        <v-btn
+          v-if="selected && selected.length === 1"
+          color="primary"
+          dark
+          class="mb-2"
+          :to="{ name: 'RobotDetails', params: { robotId: selected[0].id } }"
+        >
+          Details
+        </v-btn>
+      </v-card-title>
+      <v-data-table
+        :headers="headers"
+        :items="robots"
+        :search="search"
+        v-model="selected"
+        item-key="id"
+        show-select
+        hide-default-footer
+      >
+      </v-data-table>
     </v-card>
-    <div style="height: 350px;">
-      <LMap style="height: 100%; width: 100%" :zoom="zoom" :center="[55.66071, 12.6024]">
-        <LTileLayer :url="url"></LTileLayer>
-        <!-- <LMovingMarker
-          v-for="(robot, id) in robots"
-          :key="id"
-          :lat-lng="robot.posL"
-          :icon="icon"
-          :duration="duration"
-        ></LMovingMarker> -->
-      </LMap>
-    </div>
-    <div v-for="(robot, id) in locations" :key="id">{{ robot.latlng }}</div>
+    <v-card v-if="mapView">
+      <div style="height: 750px;">
+        <LMap class="mymap" :zoom="zoom" :center="[55.66071, 12.6024]">
+          <LTileLayer :url="url"></LTileLayer>
+        </LMap>
+      </div>
+    </v-card>
   </v-container>
 </template>
 
 <script>
-// import axios from "axios";
-import L from "leaflet";
+import axios from "axios";
+import authHeader from "@/auth/authHeader";
 import { LMap, LTileLayer } from "vue2-leaflet";
-// import LMovingMarker from "vue2-leaflet-movingmarker";
-
-const icon = L.icon({
-  iconUrl: "https://s3-eu-west-1.amazonaws.com/ct-documents/emails/A-static.png",
-  iconSize: [21, 31],
-  iconAnchor: [10.5, 31],
-  popupAnchor: [4, -25],
-});
-
-const locations = [];
-for (let i = 0; i < 10; i++) {
-  locations.push({
-    id: i,
-    latlng: L.latLng(rand(48.8929425), rand(2.3821873)),
-    text: "Moving Marker #" + i,
-  });
-}
-
-function rand(n) {
-  const max = n + 0.01;
-  const min = n - 0.01;
-  return Math.random() * (max - min) + min;
-}
 
 export default {
-  components: { LMap, LTileLayer },
-
+  components: {
+    LMap,
+    LTileLayer,
+  },
   data() {
     return {
       robots: [],
+      search: "",
+      selected: [],
+
+      mapView: false,
 
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      zoom: 14,
+      zoom: 13,
       bounds: null,
 
-      icon,
-
-      duration: 5000,
-      interval: null,
-
-      locations,
+      headers: [
+        {
+          text: "ID",
+          value: "id",
+        },
+        { text: "Energy used (kWh)", value: "energyUsed" },
+        { text: "Trash (%)", value: "trashLevel" },
+        { text: "Status", value: "status" },
+        { text: "Assigned", value: "engineer.name" },
+        { text: "Oil", value: "oil" },
+        { text: "Camera", value: "camera" },
+        { text: "Wheels", value: "wheels" },
+      ],
     };
   },
-  mounted() {
+  created() {
     this.fetchRobots();
   },
 
   methods: {
     fetchRobots() {
-      // axios
-      //   .get("http://localhost:5000/api/robot")
-      //   .then((response) => {
-      //     this.robots = response.data;
-      //   })
-      //   .then(() => {
-      //     this.initializeLocations();
-      //   })
-      //   .catch((error) => {
-      //     alert(error);
-      //   });
+      axios
+        .get("http://localhost:5000/api/robot", { headers: authHeader() })
+        .then((response) => {
+          this.robots = response.data;
+        })
+        .catch((error) => {
+          alert(error);
+        });
     },
-
-    // initializeLocations() {
-    //   console.log("fine");
-    //   this.robots.forEach((r) => {
-    //     r.posL = L.latLng(r.position[0], r.position[1]);
-    //   });
-    // },
 
     batteryColor(robotId) {
       const robot = this.robots.find((r) => r.id === robotId);
@@ -123,29 +112,14 @@ export default {
       else return "mdi-battery-20";
     },
   },
-
-  watch: {
-    duration: {
-      handler(value, oldValue) {
-        if (value !== oldValue) {
-          clearInterval(this.interval);
-          const setRandomLatLng = () => {
-            console.log("hello");
-            this.robots.forEach((robot) => {
-              if (robot.posL && robot.posL) robot.posL = L.latLng(rand(robot.posL.lat), rand(robot.posL.lng));
-            });
-          };
-          this.interval = setInterval(() => {
-            setRandomLatLng();
-          }, value);
-          setRandomLatLng();
-        }
-      },
-      immediate: true,
-    },
-  },
 };
 </script>
-()
 
-<style></style>
+<style scoped>
+.mymap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+</style>
