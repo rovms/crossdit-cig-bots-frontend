@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-app-bar dense app color="primary" dark>
-      <v-toolbar-title>Trash-picking robots</v-toolbar-title>
+      <v-toolbar-title>Trash / CPH</v-toolbar-title>
       <v-spacer></v-spacer>
     </v-app-bar>
     <v-main>

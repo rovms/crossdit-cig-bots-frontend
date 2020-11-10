@@ -3,7 +3,7 @@
     <v-btn :disabled="!mapView" class="mry-1" @click="mapView = !mapView">
       <v-icon>mdi-table-large</v-icon>
     </v-btn>
-    <v-btn :disabled="mapView" class="my-1" @click="mapView = !mapView">
+    <v-btn :disabled="mapView" class="mry-1" @click="mapView = !mapView">
       <v-icon>mdi-google-maps</v-icon>
     </v-btn>
     <v-card v-if="!mapView">
@@ -35,7 +35,15 @@
       <div style="height: 750px;">
         <LMap ref="robotmap" class="mymap" :zoom="zoom" :center="center" @ready="mapReady">
           <LTileLayer :url="url"></LTileLayer>
-          <LMovingMarker :lat-lng="testRobot" :duration="duration" :icon="icon" @click="hello(r)"></LMovingMarker>
+          <div v-for="(r, i) in robots" :key="i">
+            <LMovingMarker
+              ref="movingMarker"
+              :lat-lng="r"
+              :duration="duration"
+              :icon="icon"
+              @click="hello($event, i)"
+            ></LMovingMarker>
+          </div>
         </LMap>
       </div>
     </v-card>
@@ -43,8 +51,6 @@
 </template>
 
 <script>
-import axios from "axios";
-import authHeader from "@/auth/authHeader";
 import L from "leaflet";
 import { LMap, LTileLayer } from "vue2-leaflet";
 import LMovingMarker from "vue2-leaflet-movingmarker";
@@ -62,24 +68,35 @@ export default {
     LTileLayer,
     LMovingMarker,
   },
+
   data() {
     return {
-      robots: [],
+      icon,
+
       search: "",
       selected: [],
 
-      mapView: false,
+      mapView: true,
 
       testRobot: L.latLng(55.66071, 12.6024),
+
+      robots: [
+        L.latLng(55.61071, 12.6124),
+        L.latLng(55.63171, 12.6224),
+        L.latLng(55.66071, 12.6324),
+        L.latLng(55.66261, 12.6014),
+        L.latLng(55.66071, 12.6044),
+        L.latLng(55.68071, 12.6054),
+        L.latLng(55.65061, 12.6184),
+      ],
 
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       zoom: 13,
       bounds: null,
       center: [55.66071, 12.6024],
+      map: null,
 
       duration: 2000,
-
-      icon,
 
       headers: [
         {
@@ -96,42 +113,19 @@ export default {
       ],
     };
   },
-  created() {
-    this.fetchRobots();
-  },
 
   methods: {
     mapReady() {
       this.map = this.$refs.robotmap.mapObject;
     },
 
-    fetchRobots() {
-      axios
-        .get("http://localhost:5000/api/robot", { headers: authHeader() })
-        .then((response) => {
-          this.robots = response.data;
-        })
-        .catch((error) => {
-          alert(error);
-        });
-    },
-
-    batteryColor(robotId) {
-      const robot = this.robots.find((r) => r.id === robotId);
-      if (!robot) return "grey";
-      const batteryLevel = robot.batteryLevel;
-      if (batteryLevel > 70) return "green";
-      if (batteryLevel > 30) return "yellow";
-      else return "red";
-    },
-
-    batteryIcon(robotId) {
-      const robot = this.robots.find((r) => r.id === robotId);
-      if (!robot) return "mdi-battery";
-      const batteryLevel = robot.batteryLevel;
-      if (batteryLevel > 70) return "mdi-battery";
-      if (batteryLevel > 30) return "mdi-battery-50";
-      else return "mdi-battery-20";
+    hello(event, i) {
+      console.log(event);
+      console.log(i);
+      this.$refs.movingMarker[2].mapObject.slideTo([55.66071, 12.6135], {
+        duration: 10000,
+        keepAtCenter: false,
+      });
     },
   },
 };

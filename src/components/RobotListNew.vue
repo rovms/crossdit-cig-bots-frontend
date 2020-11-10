@@ -3,7 +3,7 @@
     <v-btn :disabled="!mapView" class="mry-1" @click="mapView = !mapView">
       <v-icon>mdi-table-large</v-icon>
     </v-btn>
-    <v-btn :disabled="mapView" class="my-1" @click="mapView = !mapView">
+    <v-btn :disabled="mapView" class="mry-1" @click="mapView = !mapView">
       <v-icon>mdi-google-maps</v-icon>
     </v-btn>
     <v-card v-if="!mapView">
@@ -35,7 +35,7 @@
       <div style="height: 750px;">
         <LMap ref="robotmap" class="mymap" :zoom="zoom" :center="center" @ready="mapReady">
           <LTileLayer :url="url"></LTileLayer>
-          <LMovingMarker :lat-lng="testRobot" :duration="duration" :icon="icon" @click="hello(r)"></LMovingMarker>
+          <!-- <LMovingMarker :lat-lng="testRobot" :duration="duration" :icon="icon" @click="hello(r)"></LMovingMarker> -->
         </LMap>
       </div>
     </v-card>
@@ -47,28 +47,20 @@ import axios from "axios";
 import authHeader from "@/auth/authHeader";
 import L from "leaflet";
 import { LMap, LTileLayer } from "vue2-leaflet";
-import LMovingMarker from "vue2-leaflet-movingmarker";
-
-const icon = L.icon({
-  iconUrl: "https://s3-eu-west-1.amazonaws.com/ct-documents/emails/A-static.png",
-  iconSize: [21, 31],
-  iconAnchor: [10.5, 31],
-  popupAnchor: [4, -25],
-});
 
 export default {
   components: {
     LMap,
     LTileLayer,
-    LMovingMarker,
   },
+
   data() {
     return {
       robots: [],
       search: "",
       selected: [],
 
-      mapView: false,
+      mapView: true,
 
       testRobot: L.latLng(55.66071, 12.6024),
 
@@ -76,10 +68,9 @@ export default {
       zoom: 13,
       bounds: null,
       center: [55.66071, 12.6024],
+      map: null,
 
       duration: 2000,
-
-      icon,
 
       headers: [
         {
@@ -99,6 +90,14 @@ export default {
   created() {
     this.fetchRobots();
   },
+
+  // mounted() {
+  //   this.map = L.map(this.$refs["mapElement"]).setView([51.505, 12.09], 13);
+  //   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  //     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  //   }).addTo(this.map);
+  //   this.initilizedMap = true;
+  // },
 
   methods: {
     mapReady() {
