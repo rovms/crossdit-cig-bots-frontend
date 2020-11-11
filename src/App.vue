@@ -4,15 +4,17 @@
       <v-toolbar-title>Trash / CPH</v-toolbar-title>
       <v-spacer></v-spacer>
     </v-app-bar>
-    <v-main>
-      <router-view />
+    <v-main class="mainview">
+      <v-container fluid>
+        <router-view />
+      </v-container>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import router from "./router";
-import axios from "axios";
+// import router from "./router";
+// import axios from "axios";
 export default {
   name: "App",
 
@@ -21,13 +23,18 @@ export default {
   }),
 
   created() {
-    axios.interceptors.response.use(undefined, function(err) {
-      if (err.response.status === 401) {
-        router.push({ name: "Home" });
-        return;
-      }
-      return Promise.reject(err);
-    });
+    // axios.interceptors.response.use(undefined, function(err) {
+    //   if (err.response.status === 401) {
+    //     router.push({ name: "Home" });
+    //     return;
+    //   }
+    //   return Promise.reject(err);
+    // });
   },
 };
 </script>
+<style scoped>
+/* .mainview {
+  display: flex;
+} */
+</style>
