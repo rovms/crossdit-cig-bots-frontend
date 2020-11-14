@@ -56,6 +56,14 @@ const routes = [
       authRequired: true,
     },
   },
+  // {
+  //   path: "/robots/:robotId/schedule",
+  //   name: "RobotSchedule",
+  //   component: RobotSchedule,
+  //   meta: {
+  //     authRequired: true,
+  //   },
+  // },
   {
     path: "/login",
     name: "Login",

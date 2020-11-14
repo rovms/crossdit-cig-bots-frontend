@@ -32,7 +32,7 @@
       </v-data-table>
     </v-card>
     <v-card v-if="mapView">
-      <div style="height: 750px;">
+      <div class="conti">
         <LMap ref="robotmap" class="mymap" :zoom="zoom" :center="center" @ready="mapReady">
           <LTileLayer :url="url"></LTileLayer>
           <!-- <LMovingMarker :lat-lng="testRobot" :duration="duration" :icon="icon" @click="hello(r)"></LMovingMarker> -->
@@ -142,5 +142,10 @@ export default {
   top: 0;
   bottom: 0;
   width: 100%;
+}
+
+.conti {
+  /* height: 750px; */
+  position: relative;
 }
 </style>

@@ -1,27 +1,87 @@
 <template>
   <div>
-    <v-btn :disabled="!mapView" class="my-2 mr-1" @click="mapView = !mapView">
+    <v-dialog v-model="eventDialog" max-width="500">
+      <v-card v-if="currentEvent">
+        <v-card-title>
+          <span class="headline mb-5">Assign event [ID: {{ currentEvent.id }}] to robot</span>
+        </v-card-title>
+        <v-card-text>
+          <v-select
+            v-model="eventSelectedRobot"
+            outlined
+            :items="robots"
+            label="Robots"
+            item-text="id"
+            item-value="_id"
+          ></v-select>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn @click="saveScheduledMove" class="float-right ma-3" text color="primary">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-snackbar v-model="snackbar" :timeout="timeout">
+      It can't go that far!
+      <template v-slot:action="{ attrs }">
+        <v-btn color="blue" text v-bind="attrs" @click="snackbar = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
+    <v-btn
+      :disabled="tableView"
+      class="my-2 mr-1"
+      @click="
+        {
+          mapView = false;
+          eventView = false;
+          tableView = true;
+        }
+      "
+    >
       <v-icon>mdi-table-large</v-icon>
     </v-btn>
-    <v-btn :disabled="mapView" class="mry-2" @click="mapView = !mapView">
+    <v-btn
+      :disabled="mapView"
+      class="mr-1 my-2"
+      @click="
+        {
+          mapView = true;
+          eventView = false;
+          tableView = false;
+        }
+      "
+    >
       <v-icon>mdi-google-maps</v-icon>
     </v-btn>
+    <v-btn
+      :disabled="eventView"
+      class="mr-1 my-2"
+      @click="
+        {
+          mapView = false;
+          eventView = true;
+          tableView = false;
+        }
+      "
+    >
+      <v-icon>mdi-calendar-blank-outline</v-icon>
+    </v-btn>
+    <div v-if="eventView"></div>
     <v-tooltip right>
       <template v-slot:activator="{ on, attrs }">
         <v-icon v-if="mapView" class="ml-16" color="orange" dark v-bind="attrs" v-on="on">
           mdi-information-outline
         </v-icon>
       </template>
-      <span>Click on marker and then on map to send it somewhere else.</span>
+      <span>Click on marker (robot) and then on map to send it somewhere else.</span>
     </v-tooltip>
     <v-btn v-if="selectedOnMap !== null" class="ml-16 mr-2" color="orange">
       <v-icon class="mr-3">mdi-robot</v-icon> {{ selectedRobotOnMapRef }}
     </v-btn>
-    <v-btn v-if="selectedOnMap !== null" disabled>
-      Click on map to set robot's target position.
-    </v-btn>
+    <v-btn v-if="selectedOnMap !== null" disabled> </v-btn>
 
-    <v-card v-if="!mapView">
+    <v-card v-if="tableView">
       <v-card-title>
         <v-text-field v-model="search" append-icon="mdi-magnify" label="Search" single-line hide-details></v-text-field>
         <v-spacer></v-spacer>
@@ -70,8 +130,27 @@
         </template>
       </v-data-table>
     </v-card>
+
+    <v-card v-if="eventView">
+      <v-data-table
+        class="mt-5"
+        :headers="headersEvent"
+        :items="events"
+        v-model="selectedEvent"
+        item-key="id"
+        show-select
+        hide-default-footer
+      >
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-btn small @click="scheduleThis(item)"> <v-icon small class="mr-2"> mdi-robot</v-icon>Assign </v-btn>
+        </template>
+        <template v-slot:[`item.date`]="{ item }">
+          {{ item.date | moment("DD.MM.YYYY, HH:mm") }}
+        </template>
+      </v-data-table>
+    </v-card>
     <v-card v-if="mapView">
-      <div style="height: 800px;">
+      <div class="conti">
         <LMap ref="robotmap" class="mymap" :zoom="zoom" :center="center" @ready="mapReady" @click="moveRobot">
           <LTileLayer :url="url"></LTileLayer>
           <div v-for="(r, i) in robots" :key="i">
@@ -80,47 +159,17 @@
               :lat-lng="r.latlng"
               :duration="duration"
               :icon="icon"
-              @click="selectRobot(i)"
+              @click="selectRobot(i, r)"
             ></LMovingMarker>
           </div>
         </LMap>
       </div>
     </v-card>
-    <v-dialog v-model="assignEngineerDialog" max-width="600px">
-      <v-card>
-        <v-card-title>
-          <span class="headline">Notify company</span>
-        </v-card-title>
-        <v-card-text>
-          <v-container>
-            <v-select
-              v-model="selectedEngineer"
-              outlined
-              :items="engineerOptions"
-              label="Contact"
-              item-text="name"
-              item-value="_id"
-            ></v-select>
-            <v-textarea outlined label="Additional information" v-model="notifyReason"></v-textarea>
-          </v-container>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="assignEngineerDialog = false">
-            Close
-          </v-btn>
-          <v-btn color="blue darken-1" text @click="pickup">
-            Save & Send notification
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </div>
 </template>
 
 <script>
 import axios from "axios";
-import authHeader from "@/auth/authHeader";
 import L from "leaflet";
 import { LMap, LTileLayer } from "vue2-leaflet";
 import LMovingMarker from "vue2-leaflet-movingmarker";
@@ -133,6 +182,39 @@ const icon = L.icon({
   popupAnchor: [4, -25],
 });
 
+// const events = [
+//   {
+//     id: "1234",
+//     description: "PARTY: We don't neeed no education VOL. 1",
+//     date: moment()
+//       .add(1, "minutes")
+//       .toDate(),
+//     location: "IT University Copenhagen",
+//     latlng: L.latLng(),
+//     robotId: "",
+//   },
+//   {
+//     id: "1235",
+//     description: "PARTY: We don't neeed no education VOL. 2",
+//     date: moment()
+//       .add(2, "minutes")
+//       .toDate(),
+//     location: "IT University Copenhagen",
+//     latlng: L.latLng(),
+//     robotId: "",
+//   },
+// {
+//   id: "1236",
+//   description: "PARTY: We don't neeed no education VOL. 3",
+//   date: moment()
+//     .add(4, "minutes")
+//     .toDate(),
+//   location: "IT University Copenhagen",
+//   latlng: L.latLng(),
+//   robotId: "",
+// },
+// ];
+
 export default {
   components: {
     LMap,
@@ -142,37 +224,26 @@ export default {
 
   data() {
     return {
-      assignEngineerDialog: false,
-      selectedEngineer: "",
       icon,
-      notifyReasonDetail: "",
-      engineerOptions: ["Engineer 1", "Company X"],
+      snackbar: false,
 
       search: "",
       selected: [],
 
+      searchEvent: "",
+      selectedEvent: [],
+
       mapView: true,
+      tableView: false,
+      eventView: false,
 
       testRobot: L.latLng(55.66071, 12.6024),
-
-      /**
-     *
-     * DEV
-     *
-      robots: [
-        { id: "RF981-1", latlng: L.latLng(55.61071, 12.6124) },
-        { id: "RF981-2", latlng: L.latLng(55.63171, 12.6224) },
-        { id: "RF981-3", latlng: L.latLng(55.66071, 12.6324) },
-        { id: "RF981-4", latlng: L.latLng(55.66261, 12.6014) },
-        { id: "RF981-5", latlng: L.latLng(55.66071, 12.6044) },
-        { id: "RF981-6", latlng: L.latLng(55.68071, 12.6054) },
-        { id: "RF981-7", latlng: L.latLng(55.65061, 12.6184) },
-      ],
-      */
 
       robots: [],
 
       selectedOnMap: null,
+
+      timeout: 2000,
 
       url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       zoom: 13,
@@ -197,30 +268,26 @@ export default {
         { text: "Wheels", value: "wheels" },
         { text: "Actions", value: "actions", sortable: false },
       ],
+
+      currentEvent: null,
+      eventSelectedRobot: null,
+      eventDialog: false,
+      events: [],
+      headersEvent: [
+        {
+          text: "ID",
+          value: "id",
+        },
+        { text: "Description", value: "description" },
+        { text: "Date", value: "date" },
+        { text: "Location", value: "location" },
+        { text: "Robot (ID)", value: "robot.id" },
+        { text: "Actions", value: "actions", sortable: false },
+      ],
     };
   },
 
   methods: {
-    pickup() {
-      axios
-        .post(
-          "http://localhost:5000/api/robot/pickup",
-          {
-            robotId: this.selected[0]._id,
-            engineerId: this.selectedEngineer,
-          },
-          { headers: authHeader() }
-        )
-        .then((response) => {
-          console.log(response);
-          if (response.status === 200) console.log("ok");
-        })
-        .catch((error) => {
-          console.log(error);
-          alert(error);
-        });
-    },
-
     mapReady() {
       this.map = this.$refs.robotmap.mapObject;
     },
@@ -229,16 +296,43 @@ export default {
       if (this.selectedOnMap && this.selectedOnMap.reference) {
         const current = this.selectedOnMap.reference;
         const dist = distance([event.latlng.lat, event.latlng.lng], [current._latlng.lat, current._latlng.lng]);
-        current.slideTo(event.latlng, {
-          duration: 10000000 * dist,
-          keepAtCenter: false,
-        });
+        if (dist > 0.1) {
+          this.snackbar = true;
+        } else {
+          current.slideTo(event.latlng, {
+            duration: 10000000 * dist,
+            keepAtCenter: false,
+          });
+        }
         this.selectedOnMap = null;
       }
     },
 
-    selectRobot(i) {
+    selectRobot(i, rob) {
       this.selectedOnMap = { reference: this.$refs.movingMarker[i].mapObject, index: i };
+      this.selectedOnMap2 = { reference: this.$refs.movingMarker[i].mapObject, robot: rob };
+    },
+
+    saveScheduledMove() {
+      if (this.currentEvent._id) {
+        axios
+          .post("http://localhost:5000/api/event/" + this.currentEvent._id, {
+            robotId: this.eventSelectedRobot,
+          })
+          .then((response) => {
+            if (response.status === 200) this.$router.go();
+          })
+          .catch((error) => {
+            alert(error);
+          });
+      }
+    },
+
+    scheduleThis(schedEvent) {
+      this.currentEvent = schedEvent;
+      this.eventDialog = true;
+
+      // store
     },
 
     fetchRobots() {
@@ -249,15 +343,42 @@ export default {
           this.robots.forEach((r) => {
             r.latlng = L.latLng(r.position[0], r.position[1]);
           });
+
+          setTimeout(() => {
+            console.log(this.$refs.movingMarker);
+            let i;
+            for (i = 0; i < this.robots.length; i++) {
+              if (this.robots[i].events && this.robots[i].events[0]) {
+                console.log(i);
+                if (this.$refs.movingMarker && this.$refs.movingMarker[i]) {
+                  const e = this.robots[i].events[0];
+                  const mm = this.$refs.movingMarker[i];
+                  const diffTime = new Date() - new Date(e.date);
+                  const dist = distance(e.latlng, [mm.latLng.lat, mm.latLng.lng]);
+                  console.log(diffTime);
+                  if (diffTime < 0) {
+                    console.log(mm);
+                    setTimeout(() => {
+                      console.log("sliding");
+                      mm.slideTo(L.latLng(e.latlng[0], e.latlng[1]), {
+                        duration: 10000000 * dist,
+                        keepAtCenter: false,
+                      });
+                    }, diffTime);
+                  }
+                }
+              }
+            }
+          }, 5000);
         })
         .catch((error) => alert(error));
     },
 
-    fetchEngineers() {
+    fetchEvents() {
       axios
-        .get("http://localhost:5000/api/engineer")
+        .get("http://localhost:5000/api/event")
         .then((response) => {
-          this.engineerOptions = response.data;
+          this.events = response.data;
         })
         .catch((error) => alert(error));
     },
@@ -265,7 +386,7 @@ export default {
 
   created() {
     this.fetchRobots();
-    this.fetchEngineers();
+    this.fetchEvents();
   },
 
   computed: {
@@ -274,19 +395,6 @@ export default {
         return this.robots[this.selectedOnMap.index].id;
       }
       return null;
-    },
-
-    notifyReason() {
-      if (this.selected && this.selected[0]) {
-        const robot = this.selected[0];
-        console.log(robot);
-        let errorMessage = "";
-        if (robot.wheels !== "Ok") errorMessage += robot.wheels + "\n";
-        if (robot.oil !== "Ok") errorMessage += robot.oil + "\n";
-        if (robot.camera !== "Ok") errorMessage += robot.camera + "\n";
-        return errorMessage + "\n\n" + this.notifyReasonDetail;
-      }
-      return "";
     },
   },
 };
@@ -298,5 +406,10 @@ export default {
   top: 0;
   bottom: 0;
   width: 100%;
+}
+
+.conti {
+  height: 87vh;
+  position: relative;
 }
 </style>

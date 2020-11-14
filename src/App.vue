@@ -33,8 +33,3 @@ export default {
   },
 };
 </script>
-<style scoped>
-/* .mainview {
-  display: flex;
-} */
-</style>
