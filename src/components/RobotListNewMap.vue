@@ -20,6 +20,22 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="changeEventDateDialog" max-width="500">
+      <v-card>
+        <v-card-title>
+          Set a new time
+        </v-card-title>
+        <v-card-text>
+          <v-row justify="space-around" align="center">
+            <v-time-picker format="24hr" v-model="selectedTime" use-seconds></v-time-picker> </v-row
+        ></v-card-text>
+        <v-card-actions>
+          <v-btn @click="changeEventDate" class="float-right ma-3" text color="primary">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-row class="ml-3 mr-3">
       <v-snackbar v-model="snackbar" :timeout="timeout">
         It can't go that far!
@@ -149,6 +165,15 @@
         </template>
         <template v-slot:[`item.date`]="{ item }">
           {{ item.date | moment("DD.MM.YYYY, HH:mm") }}
+          <v-icon
+            @click="
+              changeEventDateDialog = true;
+              changeEventDateId = item._id;
+            "
+            class="ml-2"
+            sml
+            >mdi-pencil</v-icon
+          >
         </template>
       </v-data-table>
     </v-card>
@@ -177,6 +202,7 @@ import L from "leaflet";
 import { LMap, LTileLayer } from "vue2-leaflet";
 import LMovingMarker from "vue2-leaflet-movingmarker";
 import distance from "euclidean-distance";
+import moment from "moment";
 
 const icon = L.icon({
   iconUrl: "https://s3-eu-west-1.amazonaws.com/ct-documents/emails/A-static.png",
@@ -273,6 +299,10 @@ export default {
         { text: "Actions", value: "actions", sortable: false },
       ],
 
+      changeEventDateDialog: false,
+      selectedTime: null,
+      changeEventDateId: "",
+
       currentEvent: null,
       eventSelectedRobot: null,
       eventDialog: false,
@@ -312,6 +342,33 @@ export default {
       }
     },
 
+    changeEventDate() {
+      const time = this.selectedTime;
+      console.log("this.changeEventDateId :>> ", this.changeEventDateId);
+      console.log("moment :>> ", moment());
+      const d = moment()
+        .set("hour", time.substring(0, 2))
+        .set("minute", time.substring(3, 5))
+        .set("second", time.substring(6, 8));
+      console.log("d.toDate() :>> ", d.toDate());
+      axios
+        .post("http://localhost:5000/api/event/changeDate/" + this.changeEventDateId, {
+          date: d.toDate(),
+        })
+        .then((response) => {
+          this.events.forEach((e) => {
+            if (e._id === this.changeEventDateId) {
+              e.date = response.data.date;
+            }
+          });
+        })
+        .then(() => {
+          this.changeEventDateId = "";
+          this.changeEventDateDialog = false;
+        })
+        .catch((error) => alert(error));
+    },
+
     selectRobot(i) {
       this.selectedOnMap = { reference: this.$refs.movingMarker[i].mapObject, index: i };
       console.log("selected on map");
@@ -337,8 +394,6 @@ export default {
     scheduleThis(schedEvent) {
       this.currentEvent = schedEvent;
       this.eventDialog = true;
-
-      // store
     },
 
     fetchRobots() {
