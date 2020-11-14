@@ -20,91 +20,96 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-snackbar v-model="snackbar" :timeout="timeout">
-      It can't go that far!
-      <template v-slot:action="{ attrs }">
-        <v-btn color="blue" text v-bind="attrs" @click="snackbar = false">
-          Close
-        </v-btn>
-      </template>
-    </v-snackbar>
-    <v-btn
-      :disabled="tableView"
-      class="my-2 mr-1"
-      @click="
-        {
-          mapView = false;
-          eventView = false;
-          tableView = true;
-        }
-      "
-    >
-      <v-icon>mdi-table-large</v-icon>
-    </v-btn>
-    <v-btn
-      :disabled="mapView"
-      class="mr-1 my-2"
-      @click="
-        {
-          mapView = true;
-          eventView = false;
-          tableView = false;
-        }
-      "
-    >
-      <v-icon>mdi-google-maps</v-icon>
-    </v-btn>
-    <v-btn
-      :disabled="eventView"
-      class="mr-1 my-2"
-      @click="
-        {
-          mapView = false;
-          eventView = true;
-          tableView = false;
-        }
-      "
-    >
-      <v-icon>mdi-calendar-blank-outline</v-icon>
-    </v-btn>
-    <div v-if="eventView"></div>
-    <v-tooltip right>
-      <template v-slot:activator="{ on, attrs }">
-        <v-icon v-if="mapView" class="ml-16" color="orange" dark v-bind="attrs" v-on="on">
-          mdi-information-outline
-        </v-icon>
-      </template>
-      <span>Click on marker (robot) and then on map to send it somewhere else.</span>
-    </v-tooltip>
-    <v-btn v-if="selectedOnMap !== null" class="ml-16 mr-2" color="orange">
-      <v-icon class="mr-3">mdi-robot</v-icon> {{ selectedRobotOnMapRef }}
-    </v-btn>
-    <v-btn v-if="selectedOnMap !== null" disabled> </v-btn>
+    <v-row class="ml-3 mr-3">
+      <v-snackbar v-model="snackbar" :timeout="timeout">
+        It can't go that far!
+        <template v-slot:action="{ attrs }">
+          <v-btn color="blue" text v-bind="attrs" @click="snackbar = false">
+            Close
+          </v-btn>
+        </template>
+      </v-snackbar>
+      <v-btn
+        :disabled="tableView"
+        class="my-2 mr-1"
+        @click="
+          {
+            mapView = false;
+            eventView = false;
+            tableView = true;
+          }
+        "
+      >
+        <v-icon>mdi-table-large</v-icon>
+      </v-btn>
+      <v-btn
+        :disabled="mapView"
+        class="mr-1 my-2"
+        @click="
+          {
+            mapView = true;
+            eventView = false;
+            tableView = false;
+          }
+        "
+      >
+        <v-icon>mdi-google-maps</v-icon>
+      </v-btn>
+      <v-btn
+        :disabled="eventView"
+        class="mr-1 my-2"
+        @click="
+          {
+            mapView = false;
+            eventView = true;
+            tableView = false;
+          }
+        "
+      >
+        <v-icon>mdi-calendar-blank-outline</v-icon>
+      </v-btn>
+      <div v-if="eventView"></div>
+      <v-tooltip right>
+        <template v-slot:activator="{ on, attrs }">
+          <v-icon v-if="mapView" class="ml-16" color="orange" dark v-bind="attrs" v-on="on">
+            mdi-information-outline
+          </v-icon>
+        </template>
+        <span>Click on marker (robot) and then on map to send it somewhere else.</span>
+      </v-tooltip>
+      <v-btn v-if="selectedOnMap !== null && mapView" class="ml-16 mr-2" color="orange">
+        <v-icon class="mr-3">mdi-robot</v-icon> {{ selectedRobotOnMapRef }}
+      </v-btn>
+      <v-btn v-if="selectedOnMap !== null && mapView" disabled> </v-btn>
+
+      <v-spacer></v-spacer>
+
+      <v-slider
+        class="mb-0"
+        v-if="mapView"
+        max="5"
+        min="0"
+        style="max-width: 300px;"
+        label="Robot speed"
+        v-model="robotSpeed"
+      >
+        <template v-slot:append class="mb-0">
+          <v-text-field
+            v-model="robotSpeed"
+            class="mt-0 pt-0 mb-0"
+            hide-details
+            single-line
+            type="number"
+            style="width: 30px"
+          ></v-text-field>
+        </template>
+      </v-slider>
+    </v-row>
 
     <v-card v-if="tableView">
       <v-card-title>
         <v-text-field v-model="search" append-icon="mdi-magnify" label="Search" single-line hide-details></v-text-field>
         <v-spacer></v-spacer>
-        <!-- <v-btn
-          :disabled="!(selected && selected.length === 1)"
-          color="primary"
-          dark
-          class="mb-2"
-          @click="assignEngineerDialog = true"
-          outlined
-        >
-          Assign contact
-        </v-btn> -->
-        <!-- <v-btn
-          text
-          :disabled="!(selected && selected.length === 1)"
-          color="primary"
-          dark
-          class="mb-2"
-          :to="{ name: 'RobotDetails', params: { robotId: selected[0] ? selected[0]._id : 'fake' } }"
-        >
-          Details
-        </v-btn> -->
       </v-card-title>
       <v-data-table
         :headers="headers"
@@ -112,7 +117,6 @@
         :search="search"
         v-model="selected"
         item-key="id"
-        show-select
         hide-default-footer
       >
         <template v-slot:[`item.wheels`]="{ item }">
@@ -138,7 +142,6 @@
         :items="events"
         v-model="selectedEvent"
         item-key="id"
-        show-select
         hide-default-footer
       >
         <template v-slot:[`item.actions`]="{ item }">
@@ -159,7 +162,7 @@
               :lat-lng="r.latlng"
               :duration="duration"
               :icon="icon"
-              @click="selectRobot(i, r)"
+              @click="selectRobot(i)"
             ></LMovingMarker>
           </div>
         </LMap>
@@ -241,6 +244,8 @@ export default {
 
       robots: [],
 
+      robotSpeed: 1,
+
       selectedOnMap: null,
 
       timeout: 2000,
@@ -252,7 +257,6 @@ export default {
       map: null,
 
       duration: 2000,
-      speed: 10000,
 
       headers: [
         {
@@ -300,7 +304,7 @@ export default {
           this.snackbar = true;
         } else {
           current.slideTo(event.latlng, {
-            duration: 10000000 * dist,
+            duration: (10000000 / this.robotSpeed) * dist,
             keepAtCenter: false,
           });
         }
@@ -308,9 +312,11 @@ export default {
       }
     },
 
-    selectRobot(i, rob) {
+    selectRobot(i) {
       this.selectedOnMap = { reference: this.$refs.movingMarker[i].mapObject, index: i };
-      this.selectedOnMap2 = { reference: this.$refs.movingMarker[i].mapObject, robot: rob };
+      console.log("selected on map");
+      console.log(this.selectedOnMap.reference);
+      // this.selectedOnMap2 = { reference: this.$refs.movingMarker[i].mapObject, robot: rob };
     },
 
     saveScheduledMove() {
@@ -345,23 +351,18 @@ export default {
           });
 
           setTimeout(() => {
-            console.log(this.$refs.movingMarker);
             let i;
             for (i = 0; i < this.robots.length; i++) {
               if (this.robots[i].events && this.robots[i].events[0]) {
-                console.log(i);
                 if (this.$refs.movingMarker && this.$refs.movingMarker[i]) {
                   const e = this.robots[i].events[0];
-                  const mm = this.$refs.movingMarker[i];
-                  const diffTime = new Date() - new Date(e.date);
-                  const dist = distance(e.latlng, [mm.latLng.lat, mm.latLng.lng]);
-                  console.log(diffTime);
-                  if (diffTime < 0) {
-                    console.log(mm);
+                  const mm = this.$refs.movingMarker[i].mapObject;
+                  const diffTime = new Date(e.date) - new Date();
+                  const dist = distance(e.latlng, [mm._latlng.lat, mm._latlng.lng]);
+                  if (diffTime > 0) {
                     setTimeout(() => {
-                      console.log("sliding");
                       mm.slideTo(L.latLng(e.latlng[0], e.latlng[1]), {
-                        duration: 10000000 * dist,
+                        duration: (10000000 / this.robotSpeed) * dist,
                         keepAtCenter: false,
                       });
                     }, diffTime);
@@ -369,7 +370,7 @@ export default {
                 }
               }
             }
-          }, 5000);
+          }, 4000);
         })
         .catch((error) => alert(error));
     },
@@ -411,5 +412,9 @@ export default {
 .conti {
   height: 87vh;
   position: relative;
+}
+
+.input__slot {
+  margin-bottom: 0px;
 }
 </style>

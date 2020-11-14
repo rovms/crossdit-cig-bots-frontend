@@ -13,7 +13,7 @@
               :items="engineerOptions"
               label="Contact"
               item-text="name"
-              item-value="_id"
+              return-object
             ></v-select>
             <v-textarea outlined label="Additional information" v-model="notifyReason"></v-textarea>
           </v-container>
@@ -35,7 +35,9 @@
       <v-list class="transparent">
         <v-list-item>
           <v-list-item-title>Status</v-list-item-title>
-          <v-list-item-subtitle class="text-right green--text"> {{ robot.status }} </v-list-item-subtitle>
+          <v-list-item-subtitle :class="robot.status !== 'Active' ? 'text-right red--text' : 'text-right green--text'">
+            {{ robot.status }}
+          </v-list-item-subtitle>
         </v-list-item>
         <v-list-item>
           <v-list-item-title>Energy used</v-list-item-title>
@@ -63,6 +65,30 @@
             {{ robot.installationAt | moment("DD.MM.YYYY") }}
           </v-list-item-subtitle>
         </v-list-item>
+        <v-list-item>
+          <v-list-item-title>Oil</v-list-item-title>
+          <v-list-item-subtitle class="text-right">
+            {{ robot.oil }}
+          </v-list-item-subtitle>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-title>Wheels</v-list-item-title>
+          <v-list-item-subtitle :class="robot.wheels !== 'Ok' ? 'text-right red--text' : 'text-right'">
+            {{ robot.wheels }}
+          </v-list-item-subtitle>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-title>Camera</v-list-item-title>
+          <v-list-item-subtitle class="text-right">
+            {{ robot.camera }}
+          </v-list-item-subtitle>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-title>Company</v-list-item-title>
+          <v-list-item-subtitle class="text-right">
+            {{ selectedEngineer ? selectedEngineer.name : "" }}
+          </v-list-item-subtitle>
+        </v-list-item>
 
         <v-list-item>
           <v-list-item-title>Battery</v-list-item-title>
@@ -77,10 +103,7 @@
 
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn text :to="{ name: 'RobotSchedule', params: { robotId: robot._id } }" small color="primary"
-          >Schedule</v-btn
-        >
-        <v-btn text @click="assignEngineerDialog = true" small color="primary">Assign</v-btn>
+        <v-btn text @click="assignEngineerDialog = true" small color="primary">Notify engineer</v-btn>
       </v-card-actions>
     </v-card>
   </div>
@@ -145,7 +168,7 @@ export default {
       axios
         .post("http://localhost:5000/api/robot/pickup", {
           robotId: this.$route.params.robotId,
-          engineerId: this.selectedEngineer,
+          engineerId: this.selectedEngineer._id,
         })
         .then((response) => {
           console.log(response);
@@ -167,20 +190,24 @@ export default {
         })
         .catch((error) => alert(error));
     },
+
+    fetchRobot() {
+      axios
+        .get("http://localhost:5000/api/robot/" + this.$route.params.robotId)
+        .then((response) => {
+          this.robot = response.data;
+          console.log(response.data);
+          this.selectedEngineer = response.data.engineer;
+        })
+        .catch((error) => {
+          alert(error);
+        });
+    },
   },
 
   created() {
-    axios
-      .get("http://localhost:5000/api/robot/" + this.$route.params.robotId)
-      .then((response) => {
-        this.robot = response.data;
-        // this.center = this.robot.position;
-      })
-      .catch((error) => {
-        alert(error);
-      });
-
     this.fetchEngineers();
+    this.fetchRobot();
   },
 
   computed: {
