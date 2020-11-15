@@ -22,14 +22,5 @@ export default {
     items: ["123", "124"],
   }),
 
-  created() {
-    // axios.interceptors.response.use(undefined, function(err) {
-    //   if (err.response.status === 401) {
-    //     router.push({ name: "Home" });
-    //     return;
-    //   }
-    //   return Promise.reject(err);
-    // });
-  },
 };
 </script>
