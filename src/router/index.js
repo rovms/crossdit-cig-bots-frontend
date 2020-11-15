@@ -1,18 +1,24 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import RobotsOverview from "@/components/RobotsOverview.vue";
+import RobotList from "@/components/RobotList.vue";
 import RobotDetails from "@/components/RobotDetails.vue";
+import Home from "@/components/Home.vue";
 
 Vue.use(VueRouter);
 
 const routes = [
   {
     path: "/",
-    name: "RobotsOverview",
-    component: RobotsOverview,
+    name: "Home",
+    component: Home,
   },
   {
-    path: "/:robotId",
+    path: "/robots",
+    name: "Robots",
+    component: RobotList,
+  },
+  {
+    path: "/robots/:robotId",
     name: "RobotDetails",
     component: RobotDetails,
   },
