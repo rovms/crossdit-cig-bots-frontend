@@ -1,73 +1,20 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import RobotList from "@/components/RobotList.vue";
-import RobotList2 from "@/components/RobotList2.vue";
-import RobotListNew from "@/components/RobotListNew.vue";
-import RobotListNewMap from "@/components/RobotListNewMap.vue";
+import RobotsOverview from "@/components/RobotsOverview.vue";
 import RobotDetails from "@/components/RobotDetails.vue";
-import Home from "@/components/Home.vue";
-import Login from "@/components/Login.vue";
 
 Vue.use(VueRouter);
 
 const routes = [
   {
     path: "/",
-    name: "Home",
-    component: Home,
+    name: "RobotsOverview",
+    component: RobotsOverview,
   },
   {
-    path: "/robots",
-    name: "Robots",
-    component: RobotList,
-    meta: {
-      authRequired: true,
-    },
-  },
-  {
-    path: "/robots2",
-    name: "Robots2",
-    component: RobotList2,
-    meta: {
-      authRequired: true,
-    },
-  },
-  {
-    path: "/robotsnew",
-    name: "RobotsNew",
-    component: RobotListNew,
-    meta: {
-      authRequired: true,
-    },
-  },
-  {
-    path: "/robotsnew/map",
-    name: "RobotsNewMap",
-    component: RobotListNewMap,
-    meta: {
-      authRequired: true,
-    },
-  },
-  {
-    path: "/robots/:robotId",
+    path: "/:robotId",
     name: "RobotDetails",
     component: RobotDetails,
-    meta: {
-      authRequired: true,
-    },
-  },
-  // {
-  //   path: "/robots/:robotId/schedule",
-  //   name: "RobotSchedule",
-  //   component: RobotSchedule,
-  //   meta: {
-  //     authRequired: true,
-  //   },
-  // },
-  {
-    path: "/login",
-    name: "Login",
-    component: Login,
   },
 ];
 
@@ -76,12 +23,5 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes,
 });
-
-// router.beforeEach((to, from, next) => {
-//   const authRequired = to.matched.some((record) => record.meta.authRequired);
-//   const token = localStorage.getItem("engineer");
-//   if (!!token || !authRequired) return next();
-//   return next("/login");
-// });
 
 export default router;

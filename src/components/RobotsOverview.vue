@@ -334,10 +334,11 @@ export default {
         if (dist > 0.1) {
           this.snackbar = true;
         } else {
-          current.slideTo(event.latlng, {
-            duration: (10000000 / this.robotSpeed) * dist,
-            keepAtCenter: false,
-          });
+          if (this.robotSpeed > 0)
+            current.slideTo(event.latlng, {
+              duration: (10000000 / this.robotSpeed) * dist,
+              keepAtCenter: false,
+            });
         }
         this.selectedOnMap = null;
       }
@@ -418,10 +419,11 @@ export default {
                   const dist = distance(e.latlng, [mm._latlng.lat, mm._latlng.lng]);
                   if (diffTime > 0) {
                     setTimeout(() => {
-                      mm.slideTo(L.latLng(e.latlng[0], e.latlng[1]), {
-                        duration: (10000000 / this.robotSpeed) * dist,
-                        keepAtCenter: false,
-                      });
+                      if (this.robotSpeed > 0)
+                        mm.slideTo(L.latLng(e.latlng[0], e.latlng[1]), {
+                          duration: (10000000 / this.robotSpeed) * dist,
+                          keepAtCenter: false,
+                        });
                     }, diffTime);
                   }
                 }
