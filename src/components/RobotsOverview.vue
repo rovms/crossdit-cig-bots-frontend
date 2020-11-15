@@ -16,7 +16,7 @@
           ></v-select>
         </v-card-text>
         <v-card-actions>
-          <v-btn @click="saveScheduledMove" class="float-right ma-3" text color="primary">Save</v-btn>
+          <v-btn :disabled="savingScheduled" @click="saveScheduledMove" class="float-right ma-3" text color="primary">Save</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -303,6 +303,8 @@ export default {
       selectedTime: null,
       changeEventDateId: "",
 
+      savingScheduled: false,
+
       currentEvent: null,
       eventSelectedRobot: null,
       eventDialog: false,
@@ -380,6 +382,8 @@ export default {
 
     saveScheduledMove() {
       if (this.currentEvent._id) {
+        this.savingScheduled = true;
+        
         axios
           .post(this.API_URL + "/event/" + this.currentEvent._id, {
             robotId: this.eventSelectedRobot,
