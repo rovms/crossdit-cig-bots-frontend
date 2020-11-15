@@ -307,6 +307,7 @@ export default {
       eventSelectedRobot: null,
       eventDialog: false,
       events: [],
+      API_URL: process.env.VUE_APP_API_URL,
       headersEvent: [
         {
           text: "ID",
@@ -352,7 +353,7 @@ export default {
         .set("second", time.substring(6, 8));
       console.log("d.toDate() :>> ", d.toDate());
       axios
-        .post("http://localhost:5000/api/event/changeDate/" + this.changeEventDateId, {
+        .post(this.API_URL + "/event/changeDate/" + this.changeEventDateId, {
           date: d.toDate(),
         })
         .then((response) => {
@@ -379,7 +380,7 @@ export default {
     saveScheduledMove() {
       if (this.currentEvent._id) {
         axios
-          .post("http://localhost:5000/api/event/" + this.currentEvent._id, {
+          .post(this.API_URL + "/event/" + this.currentEvent._id, {
             robotId: this.eventSelectedRobot,
           })
           .then((response) => {
@@ -397,8 +398,9 @@ export default {
     },
 
     fetchRobots() {
+      console.log(process.env);
       axios
-        .get("http://localhost:5000/api/robot")
+        .get(this.API_URL + "/robot")
         .then((response) => {
           this.robots = response.data;
           this.robots.forEach((r) => {
@@ -432,7 +434,7 @@ export default {
 
     fetchEvents() {
       axios
-        .get("http://localhost:5000/api/event")
+        .get(this.API_URL + "/event")
         .then((response) => {
           this.events = response.data;
         })
