@@ -30,7 +30,7 @@
       </v-card>
     </v-dialog>
     <v-row>
-      <v-col cols="3">
+      <v-col cols="4">
         <v-card>
           <v-card-title class="pb-0"> ID: {{ robot.id }} </v-card-title>
           <v-list class="transparent">
@@ -44,9 +44,6 @@
             </v-list-item>
             <v-list-item>
               <v-list-item-title>Energy used</v-list-item-title>
-              <v-list-item-icon>
-                <v-icon>mdi-chart-donut</v-icon>
-              </v-list-item-icon>
               <v-list-item-subtitle class="text-right"> {{ robot.energyUsed || 0 }} kWh </v-list-item-subtitle>
             </v-list-item>
 
@@ -111,12 +108,12 @@
         </v-card>
       </v-col>
 
-      <v-col v-if="!assignEngineerDialog">
+      <v-col v-if="!assignEngineerDialog && robot && robot.position">
         <v-card>
           <div class="conti">
-            <LMap ref="robotmap" class="mymap" :zoom="zoom" :center="center">
+            <LMap ref="robotmap" class="mymap" :zoom="zoom" :center="center" @ready="mapReady">
               <LTileLayer :url="url"></LTileLayer>
-              <LMovingMarker :lat-lng="robot.latlng" :duration="duration" :icon="icon"></LMovingMarker>
+              <LMarker :lat-lng="robot.position"></LMarker>
             </LMap>
           </div>
         </v-card>
@@ -127,16 +124,7 @@
 
 <script>
 import axios from "axios";
-import L from "leaflet";
-import { LMap, LTileLayer } from "vue2-leaflet";
-import LMovingMarker from "vue2-leaflet-movingmarker";
-
-const icon = L.icon({
-  iconUrl: "https://s3-eu-west-1.amazonaws.com/ct-documents/emails/A-static.png",
-  iconSize: [21, 31],
-  iconAnchor: [10.5, 31],
-  popupAnchor: [4, -25],
-});
+import { LMap, LTileLayer, LMarker } from "vue2-leaflet";
 
 const trash = [
   {
@@ -157,12 +145,11 @@ export default {
   components: {
     LMap,
     LTileLayer,
-    LMovingMarker,
+    LMarker,
   },
 
   data() {
     return {
-      icon,
       duration: 2000,
 
       assignEngineerDialog: false,
@@ -197,7 +184,6 @@ export default {
 
   methods: {
     mapReady() {
-      console.log("hello");
       this.map = this.$refs.robotmap.mapObject;
     },
 
@@ -231,6 +217,7 @@ export default {
     },
 
     fetchRobot() {
+      console.log("feching r");
       axios
         .get(this.API_URL + "/robot/" + this.$route.params.robotId)
         .then((response) => {
@@ -245,8 +232,8 @@ export default {
   },
 
   created() {
-    this.fetchEngineers();
     this.fetchRobot();
+    this.fetchEngineers();
   },
 
   computed: {

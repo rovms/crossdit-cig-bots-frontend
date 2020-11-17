@@ -38,15 +38,15 @@
       </v-card>
     </v-dialog>
 
+    <v-snackbar v-model="snackbar" :timeout="timeout">
+      It can't go that far!
+      <template v-slot:action="{ attrs }">
+        <v-btn color="blue" text v-bind="attrs" @click="snackbar = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
     <v-row class="ml-3 mr-3">
-      <v-snackbar v-model="snackbar" :timeout="timeout">
-        It can't go that far!
-        <template v-slot:action="{ attrs }">
-          <v-btn color="blue" text v-bind="attrs" @click="snackbar = false">
-            Close
-          </v-btn>
-        </template>
-      </v-snackbar>
       <v-btn
         :disabled="tableView"
         class="my-2 mr-1"
@@ -86,30 +86,29 @@
       >
         <v-icon class="mr-3">mdi-calendar-blank-outline</v-icon> Events
       </v-btn>
-      <div v-if="eventView"></div>
+      <div class="text-center">
+        <v-btn
+          v-if="selectedOnMap !== null && mapView"
+          class="ml-12 mr-2 white--text nottransf"
+          :color="selectedRobotOnMapRef.wheels === 'Ok' ? 'green' : 'red'"
+          :to="{ name: 'RobotDetails', params: { robotId: selectedRobotOnMapRef._id } }"
+        >
+          <v-icon class="mr-3">mdi-robot</v-icon>
+          {{
+            selectedRobotOnMapRef.id +
+              (selectedRobotOnMapRef.wheels === "Ok" ? " ----- OK" : " ----- Wheels: " + selectedRobotOnMapRef.wheels)
+          }}
+        </v-btn>
+      </div>
+
       <v-tooltip right>
         <template v-slot:activator="{ on, attrs }">
           <v-icon v-if="mapView" class="ml-16" color="orange" dark v-bind="attrs" v-on="on">
             mdi-information-outline
           </v-icon>
         </template>
-        <span>Click on robot and then on desired position on map to send it somewhere else.</span>
+        <span>Click on robot and then on target position on map to send it somewhere else.</span>
       </v-tooltip>
-      <v-btn
-        v-if="selectedOnMap !== null && mapView"
-        class="ml-16 mr-2 white--text nottransf"
-        :color="selectedRobotOnMapRef.wheels === 'Ok' ? 'green' : 'red'"
-        :to="{ name: 'RobotDetails', params: { robotId: selectedRobotOnMapRef._id } }"
-      >
-        <v-icon class="mr-3">mdi-robot</v-icon>
-        <div>
-          {{
-            selectedRobotOnMapRef.id +
-              (selectedRobotOnMapRef.wheels === "Ok" ? " ----- OK" : " ----- Wheels: " + selectedRobotOnMapRef.wheels)
-          }}
-        </div>
-        <br />
-      </v-btn>
 
       <v-spacer></v-spacer>
 
