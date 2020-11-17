@@ -30,7 +30,7 @@
       </v-card>
     </v-dialog>
 
-    <v-card>
+    <v-card max-width="600px">
       <v-card-title class="pb-0"> ID: {{ robot.id }} </v-card-title>
       <v-list class="transparent">
         <v-list-item>
