@@ -15,7 +15,7 @@
               item-text="name"
               return-object
             ></v-select>
-            <v-textarea outlined label="Additional information" v-model="notifyReason"></v-textarea>
+            <v-textarea rows="10" outlined label="Information" v-model="notifyReason"></v-textarea>
           </v-container>
         </v-card-text>
         <v-card-actions>
@@ -103,7 +103,7 @@
 
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn text @click="assignEngineerDialog = true" small color="primary">Notify engineer</v-btn>
+        <v-btn text @click="assignEngineerDialog = true" x-large color="primary">Notify company</v-btn>
       </v-card-actions>
     </v-card>
   </div>
@@ -165,21 +165,23 @@ export default {
     },
 
     pickup() {
-      axios
-        .post("http://localhost:5000/api/robot/pickup", {
-          robotId: this.$route.params.robotId,
-          engineerId: this.selectedEngineer._id,
-        })
-        .then((response) => {
-          console.log(response);
-          if (response.status === 200) console.log("ok");
-        })
-        .catch((error) => {
-          console.log(error);
-          alert(error);
-        });
+      if (this.selectedEngineer) {
+        axios
+          .post("http://localhost:5000/api/robot/pickup", {
+            robotId: this.$route.params.robotId,
+            engineerId: this.selectedEngineer._id,
+          })
+          .then((response) => {
+            console.log(response);
+            if (response.status === 200) console.log("ok");
+          })
+          .catch((error) => {
+            console.log(error);
+            alert(error);
+          });
 
-      this.assignEngineerDialog = false;
+        this.assignEngineerDialog = false;
+      } else alert("Please select an engineer.");
     },
 
     fetchEngineers() {
@@ -212,16 +214,12 @@ export default {
 
   computed: {
     notifyReason() {
-      if (this.selected && this.selected[0]) {
-        const robot = this.selected[0];
-        console.log(robot);
-        let errorMessage = "";
-        if (robot.wheels !== "Ok") errorMessage += robot.wheels + "\n";
-        if (robot.oil !== "Ok") errorMessage += robot.oil + "\n";
-        if (robot.camera !== "Ok") errorMessage += robot.camera + "\n";
-        return errorMessage + "\n\n" + this.notifyReasonDetail;
-      }
-      return "";
+      const robot = this.robot;
+      let errorMessage = "---- " + robot.id + " ----\n\n";
+      errorMessage += "Wheels: " + robot.wheels + "\n";
+      errorMessage += "Oil: " + robot.oil + "\n";
+      errorMessage += "Camera: " + robot.camera + "\n\n";
+      return errorMessage + "\n\n" + this.notifyReasonDetail;
     },
   },
 };
