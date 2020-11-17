@@ -29,88 +29,114 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-row>
+      <v-col cols="3">
+        <v-card>
+          <v-card-title class="pb-0"> ID: {{ robot.id }} </v-card-title>
+          <v-list class="transparent">
+            <v-list-item>
+              <v-list-item-title>Status</v-list-item-title>
+              <v-list-item-subtitle
+                :class="robot.status !== 'Active' ? 'text-right red--text' : 'text-right green--text'"
+              >
+                {{ robot.status }}
+              </v-list-item-subtitle>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Energy used</v-list-item-title>
+              <v-list-item-icon>
+                <v-icon>mdi-chart-donut</v-icon>
+              </v-list-item-icon>
+              <v-list-item-subtitle class="text-right"> {{ robot.energyUsed || 0 }} kWh </v-list-item-subtitle>
+            </v-list-item>
 
-    <v-card max-width="600px">
-      <v-card-title class="pb-0"> ID: {{ robot.id }} </v-card-title>
-      <v-list class="transparent">
-        <v-list-item>
-          <v-list-item-title>Status</v-list-item-title>
-          <v-list-item-subtitle :class="robot.status !== 'Active' ? 'text-right red--text' : 'text-right green--text'">
-            {{ robot.status }}
-          </v-list-item-subtitle>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-title>Energy used</v-list-item-title>
-          <v-list-item-icon>
-            <v-icon>mdi-chart-donut</v-icon>
-          </v-list-item-icon>
-          <v-list-item-subtitle class="text-right"> {{ robot.energyUsed || 0 }} kWh </v-list-item-subtitle>
-        </v-list-item>
+            <v-list-group>
+              <template v-slot:activator>
+                <v-list-item-content>
+                  <v-list-item-title class="font-italic">Last trash collected</v-list-item-title>
+                </v-list-item-content>
+              </template>
+              <v-list-item v-for="(t, i) in trash" :key="i">
+                <v-list-item-title>{{ t.date | moment("DD.MM, h:mm") }}</v-list-item-title>
+                <v-list-item-subtitle class="text-right"> {{ t.weight }} g </v-list-item-subtitle>
+              </v-list-item>
+            </v-list-group>
 
-        <v-list-group>
-          <template v-slot:activator>
-            <v-list-item-content>
-              <v-list-item-title class="font-italic">Last trash collected</v-list-item-title>
-            </v-list-item-content>
-          </template>
-          <v-list-item v-for="(t, i) in trash" :key="i">
-            <v-list-item-title>{{ t.date | moment("DD.MM, h:mm") }}</v-list-item-title>
-            <v-list-item-subtitle class="text-right"> {{ t.weight }} g </v-list-item-subtitle>
-          </v-list-item>
-        </v-list-group>
+            <v-list-item>
+              <v-list-item-title>Installation</v-list-item-title>
+              <v-list-item-subtitle class="text-right">
+                {{ robot.installationAt | moment("DD.MM.YYYY") }}
+              </v-list-item-subtitle>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Oil</v-list-item-title>
+              <v-list-item-subtitle class="text-right">
+                {{ robot.oil }}
+              </v-list-item-subtitle>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Wheels</v-list-item-title>
+              <v-list-item-subtitle :class="robot.wheels !== 'Ok' ? 'text-right red--text' : 'text-right'">
+                {{ robot.wheels }}
+              </v-list-item-subtitle>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Camera</v-list-item-title>
+              <v-list-item-subtitle class="text-right">
+                {{ robot.camera }}
+              </v-list-item-subtitle>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Company</v-list-item-title>
+              <v-list-item-subtitle class="text-right">
+                {{ selectedEngineer ? selectedEngineer.name : "" }}
+              </v-list-item-subtitle>
+            </v-list-item>
 
-        <v-list-item>
-          <v-list-item-title>Installation</v-list-item-title>
-          <v-list-item-subtitle class="text-right">
-            {{ robot.installationAt | moment("DD.MM.YYYY") }}
-          </v-list-item-subtitle>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-title>Oil</v-list-item-title>
-          <v-list-item-subtitle class="text-right">
-            {{ robot.oil }}
-          </v-list-item-subtitle>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-title>Wheels</v-list-item-title>
-          <v-list-item-subtitle :class="robot.wheels !== 'Ok' ? 'text-right red--text' : 'text-right'">
-            {{ robot.wheels }}
-          </v-list-item-subtitle>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-title>Camera</v-list-item-title>
-          <v-list-item-subtitle class="text-right">
-            {{ robot.camera }}
-          </v-list-item-subtitle>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-title>Company</v-list-item-title>
-          <v-list-item-subtitle class="text-right">
-            {{ selectedEngineer ? selectedEngineer.name : "" }}
-          </v-list-item-subtitle>
-        </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Battery</v-list-item-title>
+              <v-list-item-subtitle class="text-right"> {{ robot.batteryLevel || 0 }} % </v-list-item-subtitle>
+            </v-list-item>
 
-        <v-list-item>
-          <v-list-item-title>Battery</v-list-item-title>
-          <v-list-item-subtitle class="text-right"> {{ robot.batteryLevel || 0 }} % </v-list-item-subtitle>
-        </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Trash level</v-list-item-title>
+              <v-list-item-subtitle class="text-right"> {{ robot.trashLevel || 0 }} % </v-list-item-subtitle>
+            </v-list-item>
+          </v-list>
 
-        <v-list-item>
-          <v-list-item-title>Trash level</v-list-item-title>
-          <v-list-item-subtitle class="text-right"> {{ robot.trashLevel || 0 }} % </v-list-item-subtitle>
-        </v-list-item>
-      </v-list>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn text @click="assignEngineerDialog = true" x-large color="primary">Notify company</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
 
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn text @click="assignEngineerDialog = true" x-large color="primary">Notify company</v-btn>
-      </v-card-actions>
-    </v-card>
+      <v-col v-if="!assignEngineerDialog">
+        <v-card>
+          <div class="conti">
+            <LMap ref="robotmap" class="mymap" :zoom="zoom" :center="center">
+              <LTileLayer :url="url"></LTileLayer>
+              <LMovingMarker :lat-lng="robot.latlng" :duration="duration" :icon="icon"></LMovingMarker>
+            </LMap>
+          </div>
+        </v-card>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
 <script>
 import axios from "axios";
+import L from "leaflet";
+import { LMap, LTileLayer } from "vue2-leaflet";
+import LMovingMarker from "vue2-leaflet-movingmarker";
+
+const icon = L.icon({
+  iconUrl: "https://s3-eu-west-1.amazonaws.com/ct-documents/emails/A-static.png",
+  iconSize: [21, 31],
+  iconAnchor: [10.5, 31],
+  popupAnchor: [4, -25],
+});
 
 const trash = [
   {
@@ -128,8 +154,17 @@ const trash = [
 ];
 
 export default {
+  components: {
+    LMap,
+    LTileLayer,
+    LMovingMarker,
+  },
+
   data() {
     return {
+      icon,
+      duration: 2000,
+
       assignEngineerDialog: false,
       selectedEngineer: "",
       engineerOptions: [],
@@ -227,4 +262,16 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.conti {
+  height: 87vh;
+  position: relative;
+}
+
+.mymap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+</style>

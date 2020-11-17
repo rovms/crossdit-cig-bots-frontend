@@ -224,39 +224,6 @@ const icon = L.icon({
   popupAnchor: [4, -25],
 });
 
-// const events = [
-//   {
-//     id: "1234",
-//     description: "PARTY: We don't neeed no education VOL. 1",
-//     date: moment()
-//       .add(1, "minutes")
-//       .toDate(),
-//     location: "IT University Copenhagen",
-//     latlng: L.latLng(),
-//     robotId: "",
-//   },
-//   {
-//     id: "1235",
-//     description: "PARTY: We don't neeed no education VOL. 2",
-//     date: moment()
-//       .add(2, "minutes")
-//       .toDate(),
-//     location: "IT University Copenhagen",
-//     latlng: L.latLng(),
-//     robotId: "",
-//   },
-// {
-//   id: "1236",
-//   description: "PARTY: We don't neeed no education VOL. 3",
-//   date: moment()
-//     .add(4, "minutes")
-//     .toDate(),
-//   location: "IT University Copenhagen",
-//   latlng: L.latLng(),
-//   robotId: "",
-// },
-// ];
-
 export default {
   components: {
     LMap,
