@@ -93,7 +93,7 @@
             mdi-information-outline
           </v-icon>
         </template>
-        <span>Click on marker (robot) and then on map to send it somewhere else.</span>
+        <span>Click on robot and then on desired position on map to send it somewhere else.</span>
       </v-tooltip>
       <v-btn
         v-if="selectedOnMap !== null && mapView"

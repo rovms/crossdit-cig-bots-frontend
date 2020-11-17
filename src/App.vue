@@ -1,7 +1,9 @@
 <template>
   <v-app>
     <v-app-bar dense app color="primary" dark>
-      <v-toolbar-title>Bot-Service <strong> CPH </strong></v-toolbar-title>
+      <v-toolbar-title @click="$router.push('/')" style="cursor:pointer">
+        Bot-Service <strong> CPH </strong>
+      </v-toolbar-title>
       <v-spacer></v-spacer>
     </v-app-bar>
     <v-main class="mainview">
@@ -21,6 +23,5 @@ export default {
   data: () => ({
     items: ["123", "124"],
   }),
-
 };
 </script>
