@@ -135,6 +135,8 @@ export default {
       engineerOptions: [],
       notifyReasonDetail: "",
 
+      API_URL: process.env.VUE_APP_API_URL,
+
       map: null,
       trash,
       robot: {},
@@ -167,7 +169,7 @@ export default {
     pickup() {
       if (this.selectedEngineer) {
         axios
-          .post("http://localhost:5000/api/robot/pickup", {
+          .post(this.API_URL + "/robot/pickup", {
             robotId: this.$route.params.robotId,
             engineerId: this.selectedEngineer._id,
           })
@@ -186,7 +188,7 @@ export default {
 
     fetchEngineers() {
       axios
-        .get("http://localhost:5000/api/engineer")
+        .get(this.API_URL + "/engineer")
         .then((response) => {
           this.engineerOptions = response.data;
         })
@@ -195,7 +197,7 @@ export default {
 
     fetchRobot() {
       axios
-        .get("http://localhost:5000/api/robot/" + this.$route.params.robotId)
+        .get(this.API_URL + "/robot/" + this.$route.params.robotId)
         .then((response) => {
           this.robot = response.data;
           console.log(response.data);
