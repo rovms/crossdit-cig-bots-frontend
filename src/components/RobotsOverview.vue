@@ -16,7 +16,9 @@
           ></v-select>
         </v-card-text>
         <v-card-actions>
-          <v-btn :disabled="savingScheduled" @click="saveScheduledMove" class="float-right ma-3" text color="primary">Save</v-btn>
+          <v-btn :disabled="savingScheduled" @click="saveScheduledMove" class="float-right ma-3" text color="primary"
+            >Save</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -36,15 +38,15 @@
       </v-card>
     </v-dialog>
 
+    <v-snackbar v-model="snackbar" :timeout="timeout">
+      It can't go that far!
+      <template v-slot:action="{ attrs }">
+        <v-btn color="blue" text v-bind="attrs" @click="snackbar = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
     <v-row class="ml-3 mr-3">
-      <v-snackbar v-model="snackbar" :timeout="timeout">
-        It can't go that far!
-        <template v-slot:action="{ attrs }">
-          <v-btn color="blue" text v-bind="attrs" @click="snackbar = false">
-            Close
-          </v-btn>
-        </template>
-      </v-snackbar>
       <v-btn
         :disabled="tableView"
         class="my-2 mr-1"
@@ -56,7 +58,7 @@
           }
         "
       >
-        <v-icon>mdi-table-large</v-icon>
+        <v-icon class="mr-3">mdi-table-large</v-icon> Overview
       </v-btn>
       <v-btn
         :disabled="mapView"
@@ -69,7 +71,7 @@
           }
         "
       >
-        <v-icon>mdi-google-maps</v-icon>
+        <v-icon class="mr-3">mdi-google-maps</v-icon> Maps
       </v-btn>
       <v-btn
         :disabled="eventView"
@@ -82,21 +84,31 @@
           }
         "
       >
-        <v-icon>mdi-calendar-blank-outline</v-icon>
+        <v-icon class="mr-3">mdi-calendar-blank-outline</v-icon> Events
       </v-btn>
-      <div v-if="eventView"></div>
+      <div class="text-center">
+        <v-btn
+          v-if="selectedOnMap !== null && mapView"
+          class="ml-12 mr-2 white--text nottransf"
+          :color="selectedRobotOnMapRef.wheels === 'Ok' ? 'green' : 'red'"
+          :to="{ name: 'RobotDetails', params: { robotId: selectedRobotOnMapRef._id } }"
+        >
+          <v-icon class="mr-3">mdi-robot</v-icon>
+          {{
+            selectedRobotOnMapRef.id +
+              (selectedRobotOnMapRef.wheels === "Ok" ? " ----- OK" : " ----- Wheels: " + selectedRobotOnMapRef.wheels)
+          }}
+        </v-btn>
+      </div>
+
       <v-tooltip right>
         <template v-slot:activator="{ on, attrs }">
           <v-icon v-if="mapView" class="ml-16" color="orange" dark v-bind="attrs" v-on="on">
             mdi-information-outline
           </v-icon>
         </template>
-        <span>Click on marker (robot) and then on map to send it somewhere else.</span>
+        <span>Click on robot and then on target position on map to send it somewhere else.</span>
       </v-tooltip>
-      <v-btn v-if="selectedOnMap !== null && mapView" class="ml-16 mr-2" color="orange">
-        <v-icon class="mr-3">mdi-robot</v-icon> {{ selectedRobotOnMapRef }}
-      </v-btn>
-      <v-btn v-if="selectedOnMap !== null && mapView" disabled> </v-btn>
 
       <v-spacer></v-spacer>
 
@@ -211,39 +223,6 @@ const icon = L.icon({
   popupAnchor: [4, -25],
 });
 
-// const events = [
-//   {
-//     id: "1234",
-//     description: "PARTY: We don't neeed no education VOL. 1",
-//     date: moment()
-//       .add(1, "minutes")
-//       .toDate(),
-//     location: "IT University Copenhagen",
-//     latlng: L.latLng(),
-//     robotId: "",
-//   },
-//   {
-//     id: "1235",
-//     description: "PARTY: We don't neeed no education VOL. 2",
-//     date: moment()
-//       .add(2, "minutes")
-//       .toDate(),
-//     location: "IT University Copenhagen",
-//     latlng: L.latLng(),
-//     robotId: "",
-//   },
-// {
-//   id: "1236",
-//   description: "PARTY: We don't neeed no education VOL. 3",
-//   date: moment()
-//     .add(4, "minutes")
-//     .toDate(),
-//   location: "IT University Copenhagen",
-//   latlng: L.latLng(),
-//   robotId: "",
-// },
-// ];
-
 export default {
   components: {
     LMap,
@@ -286,13 +265,13 @@ export default {
 
       headers: [
         {
-          text: "ID",
+          text: "Robot ID",
           value: "id",
         },
         { text: "Energy used (kWh)", value: "energyUsed" },
         { text: "Trash (%)", value: "trashLevel" },
         { text: "Status", value: "status" },
-        { text: "Assigned", value: "engineer.name" },
+        { text: "Assigned to", value: "engineer.name" },
         { text: "Oil", value: "oil" },
         { text: "Camera", value: "camera" },
         { text: "Wheels", value: "wheels" },
@@ -312,13 +291,13 @@ export default {
       API_URL: process.env.VUE_APP_API_URL,
       headersEvent: [
         {
-          text: "ID",
+          text: "Event ID",
           value: "id",
         },
         { text: "Description", value: "description" },
         { text: "Date", value: "date" },
         { text: "Location", value: "location" },
-        { text: "Robot (ID)", value: "robot.id" },
+        { text: "Assigned robot (ID)", value: "robot.id" },
         { text: "Actions", value: "actions", sortable: false },
       ],
     };
@@ -383,7 +362,7 @@ export default {
     saveScheduledMove() {
       if (this.currentEvent._id) {
         this.savingScheduled = true;
-        
+
         axios
           .post(this.API_URL + "/event/" + this.currentEvent._id, {
             robotId: this.eventSelectedRobot,
@@ -456,7 +435,8 @@ export default {
   computed: {
     selectedRobotOnMapRef() {
       if (this.selectedOnMap !== null) {
-        return this.robots[this.selectedOnMap.index].id;
+        const robot = this.robots[this.selectedOnMap.index];
+        return robot;
       }
       return null;
     },
@@ -479,5 +459,9 @@ export default {
 
 .input__slot {
   margin-bottom: 0px;
+}
+
+.nottransf {
+  text-transform: none;
 }
 </style>

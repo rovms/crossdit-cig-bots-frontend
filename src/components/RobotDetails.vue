@@ -15,7 +15,7 @@
               item-text="name"
               return-object
             ></v-select>
-            <v-textarea outlined label="Additional information" v-model="notifyReason"></v-textarea>
+            <v-textarea rows="10" outlined label="Information" v-model="notifyReason"></v-textarea>
           </v-container>
         </v-card-text>
         <v-card-actions>
@@ -29,88 +29,102 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-row>
+      <v-col cols="4">
+        <v-card>
+          <v-card-title class="pb-0"> ID: {{ robot.id }} </v-card-title>
+          <v-list class="transparent">
+            <v-list-item>
+              <v-list-item-title>Status</v-list-item-title>
+              <v-list-item-subtitle
+                :class="robot.status !== 'Active' ? 'text-right red--text' : 'text-right green--text'"
+              >
+                {{ robot.status }}
+              </v-list-item-subtitle>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Energy used</v-list-item-title>
+              <v-list-item-subtitle class="text-right"> {{ robot.energyUsed || 0 }} kWh </v-list-item-subtitle>
+            </v-list-item>
 
-    <v-card>
-      <v-card-title class="pb-0"> ID: {{ robot.id }} </v-card-title>
-      <v-list class="transparent">
-        <v-list-item>
-          <v-list-item-title>Status</v-list-item-title>
-          <v-list-item-subtitle :class="robot.status !== 'Active' ? 'text-right red--text' : 'text-right green--text'">
-            {{ robot.status }}
-          </v-list-item-subtitle>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-title>Energy used</v-list-item-title>
-          <v-list-item-icon>
-            <v-icon>mdi-chart-donut</v-icon>
-          </v-list-item-icon>
-          <v-list-item-subtitle class="text-right"> {{ robot.energyUsed || 0 }} kWh </v-list-item-subtitle>
-        </v-list-item>
+            <v-list-group>
+              <template v-slot:activator>
+                <v-list-item-content>
+                  <v-list-item-title class="font-italic">Last trash collected</v-list-item-title>
+                </v-list-item-content>
+              </template>
+              <v-list-item v-for="(t, i) in trash" :key="i">
+                <v-list-item-title>{{ t.date | moment("DD.MM, h:mm") }}</v-list-item-title>
+                <v-list-item-subtitle class="text-right"> {{ t.weight }} g </v-list-item-subtitle>
+              </v-list-item>
+            </v-list-group>
 
-        <v-list-group>
-          <template v-slot:activator>
-            <v-list-item-content>
-              <v-list-item-title class="font-italic">Last trash collected</v-list-item-title>
-            </v-list-item-content>
-          </template>
-          <v-list-item v-for="(t, i) in trash" :key="i">
-            <v-list-item-title>{{ t.date | moment("DD.MM, h:mm") }}</v-list-item-title>
-            <v-list-item-subtitle class="text-right"> {{ t.weight }} g </v-list-item-subtitle>
-          </v-list-item>
-        </v-list-group>
+            <v-list-item>
+              <v-list-item-title>Installation</v-list-item-title>
+              <v-list-item-subtitle class="text-right">
+                {{ robot.installationAt | moment("DD.MM.YYYY") }}
+              </v-list-item-subtitle>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Oil</v-list-item-title>
+              <v-list-item-subtitle class="text-right">
+                {{ robot.oil }}
+              </v-list-item-subtitle>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Wheels</v-list-item-title>
+              <v-list-item-subtitle :class="robot.wheels !== 'Ok' ? 'text-right red--text' : 'text-right'">
+                {{ robot.wheels }}
+              </v-list-item-subtitle>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Camera</v-list-item-title>
+              <v-list-item-subtitle class="text-right">
+                {{ robot.camera }}
+              </v-list-item-subtitle>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Company</v-list-item-title>
+              <v-list-item-subtitle class="text-right">
+                {{ selectedEngineer ? selectedEngineer.name : "" }}
+              </v-list-item-subtitle>
+            </v-list-item>
 
-        <v-list-item>
-          <v-list-item-title>Installation</v-list-item-title>
-          <v-list-item-subtitle class="text-right">
-            {{ robot.installationAt | moment("DD.MM.YYYY") }}
-          </v-list-item-subtitle>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-title>Oil</v-list-item-title>
-          <v-list-item-subtitle class="text-right">
-            {{ robot.oil }}
-          </v-list-item-subtitle>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-title>Wheels</v-list-item-title>
-          <v-list-item-subtitle :class="robot.wheels !== 'Ok' ? 'text-right red--text' : 'text-right'">
-            {{ robot.wheels }}
-          </v-list-item-subtitle>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-title>Camera</v-list-item-title>
-          <v-list-item-subtitle class="text-right">
-            {{ robot.camera }}
-          </v-list-item-subtitle>
-        </v-list-item>
-        <v-list-item>
-          <v-list-item-title>Company</v-list-item-title>
-          <v-list-item-subtitle class="text-right">
-            {{ selectedEngineer ? selectedEngineer.name : "" }}
-          </v-list-item-subtitle>
-        </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Battery</v-list-item-title>
+              <v-list-item-subtitle class="text-right"> {{ robot.batteryLevel || 0 }} % </v-list-item-subtitle>
+            </v-list-item>
 
-        <v-list-item>
-          <v-list-item-title>Battery</v-list-item-title>
-          <v-list-item-subtitle class="text-right"> {{ robot.batteryLevel || 0 }} % </v-list-item-subtitle>
-        </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Trash level</v-list-item-title>
+              <v-list-item-subtitle class="text-right"> {{ robot.trashLevel || 0 }} % </v-list-item-subtitle>
+            </v-list-item>
+          </v-list>
 
-        <v-list-item>
-          <v-list-item-title>Trash level</v-list-item-title>
-          <v-list-item-subtitle class="text-right"> {{ robot.trashLevel || 0 }} % </v-list-item-subtitle>
-        </v-list-item>
-      </v-list>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn text @click="assignEngineerDialog = true" x-large color="primary">Notify company</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
 
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn text @click="assignEngineerDialog = true" small color="primary">Notify engineer</v-btn>
-      </v-card-actions>
-    </v-card>
+      <v-col v-if="!assignEngineerDialog && robot && robot.position">
+        <v-card>
+          <div class="conti">
+            <LMap ref="robotmap" class="mymap" :zoom="zoom" :center="center" @ready="mapReady">
+              <LTileLayer :url="url"></LTileLayer>
+              <LMarker :lat-lng="robot.position"></LMarker>
+            </LMap>
+          </div>
+        </v-card>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
 <script>
 import axios from "axios";
+import { LMap, LTileLayer, LMarker } from "vue2-leaflet";
 
 const trash = [
   {
@@ -128,12 +142,22 @@ const trash = [
 ];
 
 export default {
+  components: {
+    LMap,
+    LTileLayer,
+    LMarker,
+  },
+
   data() {
     return {
+      duration: 2000,
+
       assignEngineerDialog: false,
       selectedEngineer: "",
       engineerOptions: [],
       notifyReasonDetail: "",
+
+      API_URL: process.env.VUE_APP_API_URL,
 
       map: null,
       trash,
@@ -160,31 +184,32 @@ export default {
 
   methods: {
     mapReady() {
-      console.log("hello");
       this.map = this.$refs.robotmap.mapObject;
     },
 
     pickup() {
-      axios
-        .post("http://localhost:5000/api/robot/pickup", {
-          robotId: this.$route.params.robotId,
-          engineerId: this.selectedEngineer._id,
-        })
-        .then((response) => {
-          console.log(response);
-          if (response.status === 200) console.log("ok");
-        })
-        .catch((error) => {
-          console.log(error);
-          alert(error);
-        });
+      if (this.selectedEngineer) {
+        axios
+          .post(this.API_URL + "/robot/pickup", {
+            robotId: this.$route.params.robotId,
+            engineerId: this.selectedEngineer._id,
+          })
+          .then((response) => {
+            console.log(response);
+            if (response.status === 200) console.log("ok");
+          })
+          .catch((error) => {
+            console.log(error);
+            alert(error);
+          });
 
-      this.assignEngineerDialog = false;
+        this.assignEngineerDialog = false;
+      } else alert("Please select an engineer.");
     },
 
     fetchEngineers() {
       axios
-        .get("http://localhost:5000/api/engineer")
+        .get(this.API_URL + "/engineer")
         .then((response) => {
           this.engineerOptions = response.data;
         })
@@ -192,8 +217,9 @@ export default {
     },
 
     fetchRobot() {
+      console.log("feching r");
       axios
-        .get("http://localhost:5000/api/robot/" + this.$route.params.robotId)
+        .get(this.API_URL + "/robot/" + this.$route.params.robotId)
         .then((response) => {
           this.robot = response.data;
           console.log(response.data);
@@ -206,25 +232,33 @@ export default {
   },
 
   created() {
-    this.fetchEngineers();
     this.fetchRobot();
+    this.fetchEngineers();
   },
 
   computed: {
     notifyReason() {
-      if (this.selected && this.selected[0]) {
-        const robot = this.selected[0];
-        console.log(robot);
-        let errorMessage = "";
-        if (robot.wheels !== "Ok") errorMessage += robot.wheels + "\n";
-        if (robot.oil !== "Ok") errorMessage += robot.oil + "\n";
-        if (robot.camera !== "Ok") errorMessage += robot.camera + "\n";
-        return errorMessage + "\n\n" + this.notifyReasonDetail;
-      }
-      return "";
+      const robot = this.robot;
+      let errorMessage = "---- " + robot.id + " ----\n\n";
+      errorMessage += "Wheels: " + robot.wheels + "\n";
+      errorMessage += "Oil: " + robot.oil + "\n";
+      errorMessage += "Camera: " + robot.camera + "\n\n";
+      return errorMessage + "\n\n" + this.notifyReasonDetail;
     },
   },
 };
 </script>
 
-<style></style>
+<style>
+.conti {
+  height: 87vh;
+  position: relative;
+}
+
+.mymap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+</style>
